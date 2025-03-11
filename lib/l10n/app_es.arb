@@ -1,0 +1,447 @@
+ {"appTitle": "Logdoor",
+  "@appTitle": {
+    "description": "El título de la aplicación"
+  },
+  "login": "Iniciar sesión",
+  "@login": {
+    "description": "Texto para el botón de inicio de sesión"
+  },
+  "email": "Correo electrónico",
+  "@email": {
+    "description": "Etiqueta para campo de correo electrónico"
+  },
+  "password": "Contraseña",
+  "@password": {
+    "description": "Etiqueta para campo de contraseña"
+  },
+  "forgotPassword": "¿Olvidaste tu contraseña?",
+  "@forgotPassword": {
+    "description": "Texto para recuperar contraseña"
+  },
+  "register": "Registrarse",
+  "@register": {
+    "description": "Texto para botón de registro"
+  },
+  "needAccount": "¿Necesitas una cuenta?",
+  "@needAccount": {
+    "description": "Texto para redirigir a registro"
+  },
+  "loginError": "Error al iniciar sesión. Verifica tus credenciales.",
+  "@loginError": {
+    "description": "Mensaje de error para inicio de sesión fallido"
+  },
+  "enterVerificationCode": "Ingresa el código de verificación",
+  "@enterVerificationCode": {
+    "description": "Texto para ingresar código MFA"
+  },
+  "verificationCodeSent": "Se ha enviado un código de verificación a tu correo electrónico",
+  "@verificationCodeSent": {
+    "description": "Mensaje de código enviado"
+  },
+  "verify": "Verificar",
+  "@verify": {
+    "description": "Texto para botón de verificación"
+  },
+  "resendCode": "Reenviar código",
+  "@resendCode": {
+    "description": "Texto para reenviar código"
+  },
+  "invalidCode": "Código inválido",
+  "@invalidCode": {
+    "description": "Mensaje para código inválido"
+  },
+  "dashboard": "Panel principal",
+  "@dashboard": {
+    "description": "Título para el panel principal"
+  },
+  "overview": "Resumen",
+  "@overview": {
+    "description": "Subtítulo para sección de resumen"
+  },
+  "totalAccess": "Accesos totales",
+  "@totalAccess": {
+    "description": "Etiqueta para total de accesos"
+  },
+  "inspections": "Inspecciones",
+  "@inspections": {
+    "description": "Etiqueta para inspecciones"
+  },
+  "alerts": "Alertas",
+  "@alerts": {
+    "description": "Etiqueta para alertas"
+  },
+  "issueRate": "Tasa de problemas",
+  "@issueRate": {
+    "description": "Etiqueta para tasa de problemas"
+  },
+  "recentActivity": "Actividad reciente",
+  "@recentActivity": {
+    "description": "Título para sección de actividad reciente"
+  },
+  "activeAlerts": "Alertas activas",
+  "@activeAlerts": {
+    "description": "Título para sección de alertas activas"
+  },
+  "viewAll": "Ver todo",
+  "@viewAll": {
+    "description": "Texto para ver todo"
+  },
+  "accessControl": "Control de acceso",
+  "@accessControl": {
+    "description": "Título para la sección de control de acceso"
+  },
+  "newAccess": "Nuevo acceso",
+  "@newAccess": {
+    "description": "Texto para nuevo acceso"
+  },
+  "scanQrCode": "Escanear código QR",
+  "@scanQrCode": {
+    "description": "Texto para escanear QR"
+  },
+  "warehouse": "Almacén",
+  "@warehouse": {
+    "description": "Etiqueta para almacén"
+  },
+  "accessType": "Tipo de acceso",
+  "@accessType": {
+    "description": "Etiqueta para tipo de acceso"
+  },
+  "entry": "Entrada",
+  "@entry": {
+    "description": "Texto para tipo de acceso: entrada"
+  },
+  "exit": "Salida",
+  "@exit": {
+    "description": "Texto para tipo de acceso: salida"
+  },
+  "vehicleInfo": "Información del vehículo",
+  "@vehicleInfo": {
+    "description": "Título para información del vehículo"
+  },
+  "vehiclePlate": "Placa",
+  "@vehiclePlate": {
+    "description": "Etiqueta para placa de vehículo"
+  },
+  "vehicleType": "Tipo de vehículo",
+  "@vehicleType": {
+    "description": "Etiqueta para tipo de vehículo"
+  },
+  "driver": "Conductor",
+  "@driver": {
+    "description": "Etiqueta para conductor"
+  },
+  "generateAccessCode": "Generar código de acceso",
+  "@generateAccessCode": {
+    "description": "Texto para botón de generar código"
+  },
+  "accessInfo": "Información de acceso",
+  "@accessInfo": {
+    "description": "Título para información de acceso"
+  },
+  "accessCode": "Código de acceso",
+  "@accessCode": {
+    "description": "Etiqueta para código de acceso"
+  },
+  "time": "Hora",
+  "@time": {
+    "description": "Etiqueta para hora"
+  },
+  "accessCreatedOffline": "Este acceso fue creado sin conexión y se sincronizará cuando haya conexión a internet.",
+  "@accessCreatedOffline": {
+    "description": "Mensaje para acceso creado sin conexión"
+  },
+  "share": "Compartir",
+  "@share": {
+    "description": "Texto para botón de compartir"
+  },
+  "print": "Imprimir",
+  "@print": {
+    "description": "Texto para botón de imprimir"
+  },
+  "verifyingAccess": "Verificando acceso...",
+  "@verifyingAccess": {
+    "description": "Texto para verificación de acceso"
+  },
+  "aimQrCode": "Apunta la cámara al código QR para verificar el acceso",
+  "@aimQrCode": {
+    "description": "Instrucciones para escanear QR"
+  },
+  "accessVerified": "Acceso verificado",
+  "@accessVerified": {
+    "description": "Título para acceso verificado"
+  },
+  "invalidAccess": "Acceso inválido",
+  "@invalidAccess": {
+    "description": "Título para acceso inválido"
+  },
+  "proceedToInspection": "¿Deseas proceder con la inspección?",
+  "@proceedToInspection": {
+    "description": "Pregunta para proceder a inspección"
+  },
+  "proceed": "Proceder",
+  "@proceed": {
+    "description": "Texto para botón de proceder"
+  },
+  "dateRange": "Rango de fechas",
+  "@dateRange": {
+    "description": "Etiqueta para rango de fechas"
+  },
+  "ctpatInspection": "Inspección CTPAT",
+  "@ctpatInspection": {
+    "description": "Título para la inspección CTPAT"
+  },
+  "inspectionChecklist": "Lista de verificación CTPAT",
+  "@inspectionChecklist": {
+    "description": "Título para lista de verificación"
+  },
+  "checklistInstructions": "Complete todos los elementos a continuación. Cada elemento requiere un estado (Bien/Mal/Revisar) y al menos una foto.",
+  "@checklistInstructions": {
+    "description": "Instrucciones para la lista de verificación"
+  },
+  "status": "Estado",
+  "@status": {
+    "description": "Etiqueta para estado"
+  },
+  "good": "Bien",
+  "@good": {
+    "description": "Estado 'Bien' para elementos de inspección"
+  },
+  "bad": "Mal",
+  "@bad": {
+    "description": "Estado 'Mal' para elementos de inspección"
+  },
+  "review": "Revisar",
+  "@review": {
+    "description": "Estado 'Revisar' para elementos de inspección"
+  },
+  "comments": "Comentarios",
+  "@comments": {
+    "description": "Etiqueta para comentarios"
+  },
+  "commentsHint": "Ingrese observaciones o notas",
+  "@commentsHint": {
+    "description": "Texto de sugerencia para el campo de comentarios"
+  },
+  "evidencePhotos": "Fotos de evidencia",
+  "@evidencePhotos": {
+    "description": "Título para la sección de fotos de evidencia"
+  },
+  "takePhoto": "Tomar foto",
+  "@takePhoto": {
+    "description": "Texto para el botón de tomar foto"
+  },
+  "retakePhoto": "Retomar foto",
+  "@retakePhoto": {
+    "description": "Texto para retomar foto"
+  },
+  "additionalNotes": "Notas adicionales",
+  "@additionalNotes": {
+    "description": "Título para notas adicionales"
+  },
+  "additionalNotesHint": "Ingrese cualquier observación o nota adicional",
+  "@additionalNotesHint": {
+    "description": "Texto de sugerencia para notas adicionales"
+  },
+  "digitalSignature": "Firma digital",
+  "@digitalSignature": {
+    "description": "Título para firma digital"
+  },
+  "signBelow": "Por favor firme a continuación para completar la inspección",
+  "@signBelow": {
+    "description": "Instrucciones para firmar"
+  },
+  "clear": "Limpiar",
+  "@clear": {
+    "description": "Texto para el botón de limpiar"
+  },
+  "saveSignature": "Guardar firma",
+  "@saveSignature": {
+    "description": "Texto para el botón de guardar firma"
+  },
+  "submitInspection": "Enviar inspección",
+  "@submitInspection": {
+    "description": "Texto para el botón de enviar inspección"
+  },
+  "pleaseCompleteChecklist": "Por favor complete la lista de verificación",
+  "@pleaseCompleteChecklist": {
+    "description": "Mensaje de error para lista de verificación incompleta"
+  },
+  "provideStatusForAllItems": "Por favor proporcione un estado para todos los elementos de la lista",
+  "@provideStatusForAllItems": {
+    "description": "Mensaje de error para estados faltantes"
+  },
+  "takeLeastOnePhoto": "Por favor tome al menos una foto",
+  "@takeLeastOnePhoto": {
+    "description": "Mensaje de error para fotos faltantes"
+  },
+  "pleaseSignForm": "Por favor firme el formulario de inspección",
+  "@pleaseSignForm": {
+    "description": "Mensaje de error para firma faltante"
+  },
+  "successSubmitted": "Inspección enviada exitosamente",
+  "@successSubmitted": {
+    "description": "Mensaje de éxito para envío de inspección"
+  },
+  "frontBumper": "Defensa frontal",
+  "@frontBumper": {
+    "description": "Elemento de inspección: defensa frontal"
+  },
+  "frontBumperDesc": "Verifique si hay daños, modificaciones o compartimentos ocultos",
+  "@frontBumperDesc": {
+    "description": "Descripción para inspección de defensa frontal"
+  },
+  "engineCompartment": "Compartimento del motor",
+  "@engineCompartment": {
+    "description": "Elemento de inspección: compartimento del motor"
+  },
+  "engineCompartmentDesc": "Inspeccione si hay cableado sospechoso, paquetes o modificaciones",
+  "@engineCompartmentDesc": {
+    "description": "Descripción para inspección del compartimento del motor"
+  },
+  "tiresAndRims": "Llantas y rines",
+  "@tiresAndRims": {
+    "description": "Elemento de inspección: llantas y rines"
+  },
+  "tiresAndRimsDesc": "Verifique si hay daños, desgaste inusual o compartimentos ocultos",
+  "@tiresAndRimsDesc": {
+    "description": "Descripción para inspección de llantas y rines"
+  },
+  "fuelTank": "Tanque de combustible",
+  "@fuelTank": {
+    "description": "Elemento de inspección: tanque de combustible"
+  },
+  "fuelTankDesc": "Inspeccione alteraciones o anomalías",
+  "@fuelTankDesc": {
+    "description": "Descripción para inspección de tanque de combustible"
+  },
+  "cabinInterior": "Interior de cabina",
+  "@cabinInterior": {
+    "description": "Elemento de inspección: interior de cabina"
+  },
+  "cabinInteriorDesc": "Verifique si hay objetos no autorizados o modificaciones",
+  "@cabinInteriorDesc": {
+    "description": "Descripción para inspección del interior de cabina"
+  },
+  "cargoArea": "Área de carga",
+  "@cargoArea": {
+    "description": "Elemento de inspección: área de carga"
+  },
+  "cargoAreaDesc": "Verifique sellos, revise si hay acceso no autorizado",
+  "@cargoAreaDesc": {
+    "description": "Descripción para inspección de área de carga"
+  },
+  "settings": "Configuración",
+  "@settings": {
+    "description": "Título para configuración"
+  },
+  "profile": "Perfil",
+  "@profile": {
+    "description": "Etiqueta para perfil"
+  },
+  "language": "Idioma",
+  "@language": {
+    "description": "Etiqueta para idioma"
+  },
+  "theme": "Tema",
+  "@theme": {
+    "description": "Etiqueta para tema"
+  },
+  "darkMode": "Modo oscuro",
+  "@darkMode": {
+    "description": "Etiqueta para modo oscuro"
+  },
+  "biometricAuth": "Autenticación biométrica",
+  "@biometricAuth": {
+    "description": "Etiqueta para autenticación biométrica"
+  },
+  "warehouseManagement": "Gestión de almacenes",
+  "@warehouseManagement": {
+    "description": "Etiqueta para gestión de almacenes"
+  },
+  "about": "Acerca de",
+  "@about": {
+    "description": "Etiqueta para sección acerca de"
+  },
+  "logout": "Cerrar sesión",
+  "@logout": {
+    "description": "Etiqueta para cerrar sesión"
+  },
+  "confirmLogout": "¿Estás seguro de que deseas cerrar sesión?",
+  "@confirmLogout": {
+    "description": "Mensaje de confirmación para cerrar sesión"
+  },
+  "yes": "Sí",
+  "@yes": {
+      "description": "Texto para botón de confirmación"
+  },
+  "no": "No",
+  "@no": {
+    "description": "Texto para botón de negación"
+  },
+  "reports": "Reportes",
+  "@reports": {
+    "description": "Título para sección de reportes"
+  },
+  "viewReport": "Ver reporte",
+  "@viewReport": {
+    "description": "Texto para ver reporte"
+  },
+  "reportGenerated": "Reporte generado",
+  "@reportGenerated": {
+    "description": "Texto para reporte generado"
+  },
+  "offlineMode": "Modo sin conexión",
+  "@offlineMode": {
+    "description": "Texto para modo sin conexión"
+  },
+  "synchronizing": "Sincronizando datos...",
+  "@synchronizing": {
+    "description": "Texto para sincronización en progreso"
+  },
+  "syncComplete": "Sincronización completada",
+  "@syncComplete": {
+    "description": "Texto para sincronización completada"
+  },
+  "errorOccurred": "Error: {error}",
+  "@errorOccurred": {
+    "description": "Mensaje de error genérico",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Error de conexión"
+      }
+    }
+  },
+  "cancel": "Cancelar",
+  "@cancel": {
+    "description": "Texto para botón de cancelar"
+  },
+  "save": "Guardar",
+  "@save": {
+    "description": "Texto para botón de guardar"
+  },
+  "delete": "Eliminar",
+  "@delete": {
+    "description": "Texto para botón de eliminar"
+  },
+  "edit": "Editar",
+  "@edit": {
+    "description": "Texto para botón de editar"
+  },
+  "search": "Buscar",
+  "@search": {
+    "description": "Texto para buscar"
+  },
+  "filter": "Filtrar",
+  "@filter": {
+    "description": "Texto para filtrar"
+  },
+  "apply": "Aplicar",
+  "@apply": {
+    "description": "Texto para aplicar"
+  },
+  "clearFilters": "Limpiar filtros",
+  "@clearFilters": {
+    "description": "Texto para limpiar filtros"
+  }
+}

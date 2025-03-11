@@ -1,0 +1,448 @@
+{
+  "appTitle": "Logdoor",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Text for login button"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Label for email field"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Label for password field"
+  },
+  "forgotPassword": "Forgot your password?",
+  "@forgotPassword": {
+    "description": "Text for password recovery"
+  },
+  "register": "Register",
+  "@register": {
+    "description": "Text for register button"
+  },
+  "needAccount": "Need an account?",
+  "@needAccount": {
+    "description": "Text to redirect to registration"
+  },
+  "loginError": "Login error. Check your credentials.",
+  "@loginError": {
+    "description": "Error message for failed login"
+  },
+  "enterVerificationCode": "Enter verification code",
+  "@enterVerificationCode": {
+    "description": "Text to enter MFA code"
+  },
+  "verificationCodeSent": "A verification code has been sent to your email",
+  "@verificationCodeSent": {
+    "description": "Message for code sent"
+  },
+  "verify": "Verify",
+  "@verify": {
+    "description": "Text for verify button"
+  },
+  "resendCode": "Resend code",
+  "@resendCode": {
+    "description": "Text to resend code"
+  },
+  "invalidCode": "Invalid code",
+  "@invalidCode": {
+    "description": "Message for invalid code"
+  },
+  "dashboard": "Dashboard",
+  "@dashboard": {
+    "description": "Title for the dashboard"
+  },
+  "overview": "Overview",
+  "@overview": {
+    "description": "Subtitle for overview section"
+  },
+  "totalAccess": "Total Access",
+  "@totalAccess": {
+    "description": "Label for total access"
+  },
+  "inspections": "Inspections",
+  "@inspections": {
+    "description": "Label for inspections"
+  },
+  "alerts": "Alerts",
+  "@alerts": {
+    "description": "Label for alerts"
+  },
+  "issueRate": "Issue Rate",
+  "@issueRate": {
+    "description": "Label for issue rate"
+  },
+  "recentActivity": "Recent Activity",
+  "@recentActivity": {
+    "description": "Title for recent activity section"
+  },
+  "activeAlerts": "Active Alerts",
+  "@activeAlerts": {
+    "description": "Title for active alerts section"
+  },
+  "viewAll": "View All",
+  "@viewAll": {
+    "description": "Text for view all"
+  },
+  "accessControl": "Access Control",
+  "@accessControl": {
+    "description": "Title for access control section"
+  },
+  "newAccess": "New Access",
+  "@newAccess": {
+    "description": "Text for new access"
+  },
+  "scanQrCode": "Scan QR Code",
+  "@scanQrCode": {
+    "description": "Text for scan QR"
+  },
+  "warehouse": "Warehouse",
+  "@warehouse": {
+    "description": "Label for warehouse"
+  },
+  "accessType": "Access Type",
+  "@accessType": {
+    "description": "Label for access type"
+  },
+  "entry": "Entry",
+  "@entry": {
+    "description": "Text for access type: entry"
+  },
+  "exit": "Exit",
+  "@exit": {
+    "description": "Text for access type: exit"
+  },
+  "vehicleInfo": "Vehicle Information",
+  "@vehicleInfo": {
+    "description": "Title for vehicle information"
+  },
+  "vehiclePlate": "License Plate",
+  "@vehiclePlate": {
+    "description": "Label for vehicle plate"
+  },
+  "vehicleType": "Vehicle Type",
+  "@vehicleType": {
+    "description": "Label for vehicle type"
+  },
+  "driver": "Driver",
+  "@driver": {
+    "description": "Label for driver"
+  },
+  "generateAccessCode": "Generate Access Code",
+  "@generateAccessCode": {
+    "description": "Text for generate code button"
+  },
+  "accessInfo": "Access Information",
+  "@accessInfo": {
+    "description": "Title for access information"
+  },
+  "accessCode": "Access Code",
+  "@accessCode": {
+    "description": "Label for access code"
+  },
+  "time": "Time",
+  "@time": {
+    "description": "Label for time"
+  },
+  "accessCreatedOffline": "This access was created offline and will be synchronized when internet connection is available.",
+  "@accessCreatedOffline": {
+    "description": "Message for access created offline"
+  },
+  "share": "Share",
+  "@share": {
+    "description": "Text for share button"
+  },
+  "print": "Print",
+  "@print": {
+    "description": "Text for print button"
+  },
+  "verifyingAccess": "Verifying access...",
+  "@verifyingAccess": {
+    "description": "Text for access verification"
+  },
+  "aimQrCode": "Aim the camera at the QR code to verify access",
+  "@aimQrCode": {
+    "description": "Instructions for scanning QR"
+  },
+  "accessVerified": "Access Verified",
+  "@accessVerified": {
+    "description": "Title for verified access"
+  },
+  "invalidAccess": "Invalid Access",
+  "@invalidAccess": {
+    "description": "Title for invalid access"
+  },
+  "proceedToInspection": "Would you like to proceed with inspection?",
+  "@proceedToInspection": {
+    "description": "Question to proceed to inspection"
+  },
+  "proceed": "Proceed",
+  "@proceed": {
+    "description": "Text for proceed button"
+  },
+  "dateRange": "Date Range",
+  "@dateRange": {
+    "description": "Label for date range"
+  },
+  "ctpatInspection": "CTPAT Inspection",
+  "@ctpatInspection": {
+    "description": "Title for CTPAT inspection"
+  },
+  "inspectionChecklist": "CTPAT Checklist",
+  "@inspectionChecklist": {
+    "description": "Title for inspection checklist"
+  },
+  "checklistInstructions": "Complete all items below. Each item requires a status (Good/Bad/Review) and at least one photo.",
+  "@checklistInstructions": {
+    "description": "Instructions for checklist"
+  },
+  "status": "Status",
+  "@status": {
+    "description": "Label for status"
+  },
+  "good": "Good",
+  "@good": {
+    "description": "'Good' status for inspection items"
+  },
+  "bad": "Bad",
+  "@bad": {
+    "description": "'Bad' status for inspection items"
+  },
+  "review": "Review",
+  "@review": {
+    "description": "'Review' status for inspection items"
+  },
+  "comments": "Comments",
+  "@comments": {
+    "description": "Label for comments"
+  },
+  "commentsHint": "Enter observations or notes",
+  "@commentsHint": {
+    "description": "Hint text for comments field"
+  },
+  "evidencePhotos": "Evidence Photos",
+  "@evidencePhotos": {
+    "description": "Title for evidence photos section"
+  },
+  "takePhoto": "Take Photo",
+  "@takePhoto": {
+    "description": "Text for take photo button"
+  },
+  "retakePhoto": "Retake Photo",
+  "@retakePhoto": {
+    "description": "Text for retake photo"
+  },
+  "additionalNotes": "Additional Notes",
+  "@additionalNotes": {
+    "description": "Title for additional notes"
+  },
+  "additionalNotesHint": "Enter any additional observations or notes",
+  "@additionalNotesHint": {
+    "description": "Hint text for additional notes"
+  },
+  "digitalSignature": "Digital Signature",
+  "@digitalSignature": {
+    "description": "Title for digital signature"
+  },
+  "signBelow": "Please sign below to complete the inspection",
+  "@signBelow": {
+    "description": "Instructions for signing"
+  },
+  "clear": "Clear",
+  "@clear": {
+    "description": "Text for clear button"
+  },
+  "saveSignature": "Save Signature",
+  "@saveSignature": {
+    "description": "Text for save signature button"
+  },
+  "submitInspection": "Submit Inspection",
+  "@submitInspection": {
+    "description": "Text for submit inspection button"
+  },
+  "pleaseCompleteChecklist": "Please complete the checklist",
+  "@pleaseCompleteChecklist": {
+    "description": "Error message for incomplete checklist"
+  },
+  "provideStatusForAllItems": "Please provide a status for all checklist items",
+  "@provideStatusForAllItems": {
+    "description": "Error message for missing statuses"
+  },
+  "takeLeastOnePhoto": "Please take at least one photo",
+  "@takeLeastOnePhoto": {
+    "description": "Error message for missing photos"
+  },
+  "pleaseSignForm": "Please sign the inspection form",
+  "@pleaseSignForm": {
+    "description": "Error message for missing signature"
+  },
+  "successSubmitted": "Inspection submitted successfully",
+  "@successSubmitted": {
+    "description": "Success message for inspection submission"
+  },
+  "frontBumper": "Front Bumper/Defense",
+  "@frontBumper": {
+    "description": "Inspection item: front bumper"
+  },
+  "frontBumperDesc": "Check for damage, modifications, or hidden compartments",
+  "@frontBumperDesc": {
+    "description": "Description for front bumper inspection"
+  },
+  "engineCompartment": "Engine Compartment",
+  "@engineCompartment": {
+    "description": "Inspection item: engine compartment"
+  },
+  "engineCompartmentDesc": "Inspect for suspicious wiring, packages, or modifications",
+  "@engineCompartmentDesc": {
+    "description": "Description for engine compartment inspection"
+  },
+  "tiresAndRims": "Tires and Rims",
+  "@tiresAndRims": {
+    "description": "Inspection item: tires and rims"
+  },
+  "tiresAndRimsDesc": "Check for damage, unusual wear, or hidden compartments",
+  "@tiresAndRimsDesc": {
+    "description": "Description for tires and rims inspection"
+  },
+  "fuelTank": "Fuel Tank",
+  "@fuelTank": {
+    "description": "Inspection item: fuel tank"
+  },
+  "fuelTankDesc": "Inspect for alterations or anomalies",
+  "@fuelTankDesc": {
+    "description": "Description for fuel tank inspection"
+  },
+  "cabinInterior": "Cabin Interior",
+  "@cabinInterior": {
+    "description": "Inspection item: cabin interior"
+  },
+  "cabinInteriorDesc": "Check for unauthorized items or modifications",
+  "@cabinInteriorDesc": {
+    "description": "Description for cabin interior inspection"
+  },
+  "cargoArea": "Cargo Area",
+  "@cargoArea": {
+    "description": "Inspection item: cargo area"
+  },
+  "cargoAreaDesc": "Verify seals, check for unauthorized access",
+  "@cargoAreaDesc": {
+    "description": "Description for cargo area inspection"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Title for settings"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Label for profile"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Label for language"
+  },
+  "theme": "Theme",
+  "@theme": {
+    "description": "Label for theme"
+  },
+  "darkMode": "Dark Mode",
+  "@darkMode": {
+    "description": "Label for dark mode"
+  },
+  "biometricAuth": "Biometric Authentication",
+  "@biometricAuth": {
+    "description": "Label for biometric authentication"
+  },
+  "warehouseManagement": "Warehouse Management",
+  "@warehouseManagement": {
+    "description": "Label for warehouse management"
+  },
+  "about": "About",
+  "@about": {
+    "description": "Label for about section"
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Label for logout"
+  },
+  "confirmLogout": "Are you sure you want to logout?",
+  "@confirmLogout": {
+    "description": "Confirmation message for logout"
+  },
+  "yes": "Yes",
+  "@yes": {
+    "description": "Text for confirmation button"
+  },
+  "no": "No",
+  "@no": {
+    "description": "Text for denial button"
+  },
+  "reports": "Reports",
+  "@reports": {
+    "description": "Title for reports section"
+  },
+  "viewReport": "View Report",
+  "@viewReport": {
+    "description": "Text for view report"
+  },
+  "reportGenerated": "Report Generated",
+  "@reportGenerated": {
+    "description": "Text for generated report"
+  },
+  "offlineMode": "Offline Mode",
+  "@offlineMode": {
+    "description": "Text for offline mode"
+  },
+  "synchronizing": "Synchronizing data...",
+  "@synchronizing": {
+    "description": "Text for synchronization in progress"
+  },
+  "syncComplete": "Synchronization complete",
+  "@syncComplete": {
+    "description": "Text for completed synchronization"
+  },
+  "errorOccurred": "Error: {error}",
+  "@errorOccurred": {
+    "description": "Generic error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Connection error"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Text for cancel button"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Text for save button"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Text for delete button"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Text for edit button"
+  },
+  "search": "Search",
+  "@search": {
+    "description": "Text for search"
+  },
+  "filter": "Filter",
+  "@filter": {
+    "description": "Text for filter"
+  },
+  "apply": "Apply",
+  "@apply": {
+    "description": "Text for apply"
+  },
+  "clearFilters": "Clear Filters",
+  "@clearFilters": {
+    "description": "Text for clear filters"
+  }
+}
