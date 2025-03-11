@@ -1,18 +1,26 @@
+// lib/app.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'config/routes.dart';
 import 'config/theme.dart';
 import 'config/localization.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/offline_sync_service.dart';
+import 'core/services/notification_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/dashboard/providers/dashboard_provider.dart';
 import 'features/access_control/providers/access_provider.dart';
 import 'features/inspections/providers/inspection_provider.dart';
 import 'features/reports/providers/report_provider.dart';
 import 'features/settings/providers/settings_provider.dart';
+import 'features/auth/screens/login_screen.dart';
+import 'features/dashboard/screens/admin_dashboard.dart';
+import 'features/dashboard/screens/inspector_dashboard.dart';
+import 'features/dashboard/screens/guard_dashboard.dart';
+import 'features/access_control/screens/access_list_screen.dart';
 
 class LogdoorApp extends StatefulWidget {
   const LogdoorApp({Key? key}) : super(key: key);
@@ -34,6 +42,13 @@ class _LogdoorAppState extends State<LogdoorApp> {
   Future<void> _initServices() async {
     // Inicializar servicios
     await OfflineSyncService().init();
+    await NotificationService().init();
+
+    // Establecer orientación preferida
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
     // Cargar preferencias de idioma
     final locale = await LocalizationService.getPreferredLocale();
@@ -71,6 +86,7 @@ class _LogdoorAppState extends State<LogdoorApp> {
         title: 'Logdoor',
         theme: appTheme,
         locale: _appLocale,
+        home: const AuthGuard(),
 
         // Configuración de localización
         localizationsDelegates: const [
@@ -82,9 +98,50 @@ class _LogdoorAppState extends State<LogdoorApp> {
         supportedLocales: LocalizationService.supportedLocales,
         localeResolutionCallback: LocalizationService.localeResolutionCallback,
 
+        // Usar el sistema de rutas definido
         initialRoute: '/',
         onGenerateRoute: AppRouter.generateRoute,
       ),
+    );
+  }
+}
+
+class AuthGuard extends StatelessWidget {
+  const AuthGuard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
+    return FutureBuilder<bool>(
+      future: authProvider.checkAuth(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.hasData && snapshot.data == true) {
+          // Si el usuario está autenticado, redirigir basado en su rol
+          if (authProvider.currentUser != null) {
+            if (authProvider.currentUser!.isAdmin) {
+              return const AdminDashboard();
+            } else if (authProvider.currentUser!.isInspector) {
+              return const InspectorDashboard();
+            } else if (authProvider.currentUser!.isGuard) {
+              return const GuardDashboard();
+            } else {
+              return const AccessListScreen();
+            }
+          }
+        }
+
+        // Si no está autenticado, mostrar pantalla de login
+        return const LoginScreen();
+      },
     );
   }
 }

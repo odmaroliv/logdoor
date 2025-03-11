@@ -1,3 +1,4 @@
+// lib/core/api/pocketbase_client.dart
 import 'package:pocketbase/pocketbase.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/logger.dart';
@@ -19,16 +20,19 @@ class PocketBaseClient {
 
   Future<void> _initAuthStore() async {
     final authData = await _secureStorage.read(key: 'pb_auth');
-    if (authData != null) {
-      pb.authStore
-          .save(authData, await _secureStorage.read(key: 'pb_auth_token'));
+    final authToken = await _secureStorage.read(key: 'pb_auth_token');
+
+    if (authData != null && authToken != null) {
+      // Usa el método correcto para restaurar la sesión
+      pb.authStore.save(authToken, authData);
     }
 
     // Escuchar cambios de autenticación
     pb.authStore.onChange.listen((e) {
       if (pb.authStore.isValid) {
+        // Guarda los datos de autenticación en formato de cadena serializada
         _secureStorage.write(
-            key: 'pb_auth', value: pb.authStore.exportToCookie());
+            key: 'pb_auth', value: pb.authStore.model.toString());
         _secureStorage.write(key: 'pb_auth_token', value: pb.authStore.token);
       } else {
         _secureStorage.delete(key: 'pb_auth');
@@ -49,7 +53,8 @@ class PocketBaseClient {
 
   Future<bool> verifyMFA(String userId, String code) async {
     try {
-      await pb.collection('users').authWithOTP(userId, code);
+      // Corregido: pasar el código como parte del body
+      await pb.collection('users').authRefresh(body: {"code": code});
       return true;
     } catch (e) {
       Logger.error('Error en verificación MFA', error: e);

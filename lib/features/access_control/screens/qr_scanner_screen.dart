@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
-import '../../../core/services/access_service.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../providers/access_provider.dart';
 

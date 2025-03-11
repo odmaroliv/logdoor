@@ -49,12 +49,24 @@ class AccessService {
           String userName = 'Unknown';
           String warehouseName = 'Unknown';
 
-          if (record.expand != null) {
-            if (record.expand['user'] != null) {
-              userName = record.expand['user'].data['name'];
+          final expand = record.expand;
+          if (expand != null) {
+            // Verificar y procesar expand de user
+            final userList = expand['user'];
+            if (userList != null && userList.isNotEmpty) {
+              final userData = userList.first.data;
+              if (userData != null && userData.containsKey('name')) {
+                userName = userData['name'] as String? ?? 'Unknown';
+              }
             }
-            if (record.expand['warehouse'] != null) {
-              warehouseName = record.expand['warehouse'].data['name'];
+
+            // Verificar y procesar expand de warehouse
+            final warehouseList = expand['warehouse'];
+            if (warehouseList != null && warehouseList.isNotEmpty) {
+              final warehouseData = warehouseList.first.data;
+              if (warehouseData != null && warehouseData.containsKey('name')) {
+                warehouseName = warehouseData['name'] as String? ?? 'Unknown';
+              }
             }
           }
 
@@ -174,12 +186,24 @@ class AccessService {
           String userName = 'Unknown';
           String warehouseName = 'Unknown';
 
-          if (record.expand != null) {
-            if (record.expand['user'] != null) {
-              userName = record.expand['user'].data['name'];
+          final expand = record.expand;
+          if (expand != null) {
+            // Verificar y procesar expand de user
+            final userList = expand['user'];
+            if (userList != null && userList.isNotEmpty) {
+              final userData = userList.first.data;
+              if (userData != null && userData.containsKey('name')) {
+                userName = userData['name'] as String? ?? 'Unknown';
+              }
             }
-            if (record.expand['warehouse'] != null) {
-              warehouseName = record.expand['warehouse'].data['name'];
+
+            // Verificar y procesar expand de warehouse
+            final warehouseList = expand['warehouse'];
+            if (warehouseList != null && warehouseList.isNotEmpty) {
+              final warehouseData = warehouseList.first.data;
+              if (warehouseData != null && warehouseData.containsKey('name')) {
+                warehouseName = warehouseData['name'] as String? ?? 'Unknown';
+              }
             }
           }
 

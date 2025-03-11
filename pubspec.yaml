@@ -54,6 +54,12 @@ dependencies:
   # Offline support
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  timezone: ^0.10.0
+  flutter_local_notifications: ^18.0.1
+  share_plus: ^10.1.4
+  pin_code_fields: ^8.0.1
+  flutter_pdfview: ^1.4.0
+  qr_code_scanner: ^1.0.1
 
 dev_dependencies:
   flutter_test:
