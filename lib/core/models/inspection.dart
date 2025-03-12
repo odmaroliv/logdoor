@@ -1,3 +1,5 @@
+import 'package:pocketbase/pocketbase.dart';
+
 class Inspection {
   final String id;
   final String accessId;
@@ -5,9 +7,11 @@ class Inspection {
   final String inspectorName;
   final DateTime timestamp;
   final Map<String, dynamic> checklist;
-  final List<String> photos;
-  final String signature;
-  final String status; // 'pending', 'completed', 'flagged'
+  final List<String> photos; // URLs (online) o paths (offline)
+  final String photoType; // 'url' o 'path'
+  final String signature; // URL (online) o path (offline)
+  final String signatureType; // 'url' o 'path'
+  final String status;
   final String? notes;
   final bool isSync;
 
@@ -19,36 +23,60 @@ class Inspection {
     required this.timestamp,
     required this.checklist,
     required this.photos,
+    required this.photoType,
     required this.signature,
+    required this.signatureType,
     required this.status,
     this.notes,
     required this.isSync,
   });
 
-  factory Inspection.fromRecord(dynamic record) {
-    // Para registros PocketBase con relaciones expandidas
-    String inspectorName = 'Unknown';
-
-    if (record.expand != null && record.expand['inspector'] != null) {
-      inspectorName = record.expand['inspector'].data['name'];
-    }
+  factory Inspection.fromRecord(RecordModel record) {
+    final signatureList = record.getListValue<String>('signature');
+    final photosList = record.getListValue<String>('photos');
 
     return Inspection(
       id: record.id,
-      accessId: record.data['access'],
-      inspectorId: record.data['inspector'],
-      inspectorName: inspectorName,
-      timestamp: DateTime.parse(record.data['timestamp']),
+      accessId: record.getStringValue('access'),
+      inspectorId: record.getStringValue('inspector'),
+      inspectorName: record.getStringValue('inspectorName'),
+      timestamp: DateTime.parse(record.getStringValue('timestamp')),
       checklist: record.data['checklist'],
-      photos: List<String>.from(record.data['photos'] ?? []),
-      signature: record.data['signature'],
-      status: record.data['status'],
-      notes: record.data['notes'],
-      isSync: record.data['isSync'] ?? true,
+      photos: photosList,
+      photoType: 'url',
+      signature: signatureList.isNotEmpty ? signatureList.first : '',
+      signatureType: 'url',
+      status: record.getStringValue('status'),
+      notes: record.getStringValue('notes'),
+      isSync: record.getBoolValue('isSync'),
     );
   }
 
   factory Inspection.fromJson(Map<String, dynamic> json) {
+    // Manejar tanto el formato online como offline
+    List<String> photosList = [];
+    String? photoType;
+
+    if (json.containsKey('photos') && json['photos'] != null) {
+      photosList = List<String>.from(json['photos']);
+      photoType = 'url'; // Asumimos URLs por defecto
+    }
+    // Si tenemos photosPaths en lugar de photos (formato offline)
+    else if (json.containsKey('photosPaths') && json['photosPaths'] != null) {
+      photosList = List<String>.from(json['photosPaths']);
+      photoType = 'path'; // Son paths de archivos locales
+    }
+
+    // Determinar la firma
+    String? signatureValue = json['signature'];
+    String? signatureType = 'url';
+
+    // Si tenemos signaturePath en lugar de signature (formato offline)
+    if (json.containsKey('signaturePath') && json['signaturePath'] != null) {
+      signatureValue = json['signaturePath'];
+      signatureType = 'path'; // Es path de archivo local
+    }
+
     return Inspection(
       id: json['id'] ?? '',
       accessId: json['access'],
@@ -56,8 +84,10 @@ class Inspection {
       inspectorName: json['inspectorName'] ?? 'Unknown',
       timestamp: DateTime.parse(json['timestamp']),
       checklist: json['checklist'],
-      photos: List<String>.from(json['photos']),
-      signature: json['signature'],
+      photos: photosList,
+      photoType: photoType ?? 'url',
+      signature: signatureValue ?? '',
+      signatureType: signatureType,
       status: json['status'],
       notes: json['notes'],
       isSync: json['isSync'] ?? false,
@@ -65,19 +95,34 @@ class Inspection {
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    // Formato estándar para almacenamiento
+    final jsonData = {
       'id': id,
       'access': accessId,
       'inspector': inspectorId,
       'inspectorName': inspectorName,
       'timestamp': timestamp.toIso8601String(),
       'checklist': checklist,
-      'photos': photos,
-      'signature': signature,
       'status': status,
       'notes': notes,
       'isSync': isSync,
     };
+
+    // Añadir fotos según su tipo
+    if (photoType == 'path') {
+      jsonData['photosPaths'] = photos;
+    } else {
+      jsonData['photos'] = photos;
+    }
+
+    // Añadir firma según su tipo
+    if (signatureType == 'path') {
+      jsonData['signaturePath'] = signature;
+    } else {
+      jsonData['signature'] = signature;
+    }
+
+    return jsonData;
   }
 
   String get formattedTimestamp {
@@ -90,5 +135,10 @@ class Inspection {
         item is Map<String, dynamic> &&
         item['status'] != null &&
         (item['status'] == 'Mal' || item['status'] == 'Revisar'));
+  }
+
+  // Verificar si es una inspección offline
+  bool get isOffline {
+    return id.startsWith('offline_');
   }
 }

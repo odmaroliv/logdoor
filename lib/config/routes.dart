@@ -10,6 +10,14 @@ import '../features/access_control/screens/access_list_screen.dart';
 import '../features/access_control/screens/access_form_screen.dart';
 import '../features/access_control/screens/qr_scanner_screen.dart';
 import '../features/access_control/screens/qr_generator_screen.dart';
+import '../features/inspections/screens/inspection_list_screen.dart';
+import '../features/inspections/screens/inspection_form_screen.dart';
+import '../features/inspections/screens/inspection_detail_screen.dart';
+import '../features/reports/screens/report_list_screen.dart';
+import '../features/reports/screens/report_viewer_screen.dart';
+import '../features/settings/screens/settings_screen.dart';
+import '../features/settings/screens/profile_screen.dart';
+import '../features/settings/screens/warehouse_settings_screen.dart';
 import '../core/models/access.dart';
 
 class AppRouter {
@@ -30,7 +38,7 @@ class AppRouter {
           builder: (_) => MfaScreen(
             email: args?['email'] ?? '',
             password: args?['password'] ?? '',
-            otpId: args?['otpId'] ?? '', // Añadir este parámetro
+            otpId: args?['otpId'] ?? '',
           ),
         );
 
@@ -59,46 +67,42 @@ class AppRouter {
           builder: (_) => QrGeneratorScreen(access: access),
         );
 
-      // Pantallas temporales para rutas que aún no están implementadas
       case '/inspection/list':
+        return MaterialPageRoute(builder: (_) => const InspectionListScreen());
+
       case '/inspection/detail':
-      case '/inspection/new':
-      case '/reports/list':
-      case '/reports/view':
-      case '/settings':
-      case '/settings/profile':
-      case '/settings/warehouses':
-        // Pantalla temporal para rutas no implementadas
+        final args = settings.arguments as Map<String, dynamic>;
+        final inspectionId = args['inspectionId'] as String;
         return MaterialPageRoute(
-          builder: (_) => Scaffold(
-            appBar: AppBar(
-              title: Text('${settings.name} - En desarrollo'),
-            ),
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.construction,
-                    size: 64,
-                    color: Colors.amber,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'La pantalla ${settings.name} está en desarrollo',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => Navigator.of(_).pop(),
-                    child: const Text('Volver'),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          builder: (_) => InspectionDetailScreen(inspectionId: inspectionId),
         );
+
+      case '/inspection/new':
+        final args = settings.arguments as Map<String, dynamic>?;
+        final accessCode = args?['accessCode'] as String?;
+        return MaterialPageRoute(
+          builder: (_) => InspectionFormScreen(accessCode: accessCode),
+        );
+
+      case '/reports/list':
+        return MaterialPageRoute(builder: (_) => const ReportListScreen());
+
+      case '/reports/view':
+        final args = settings.arguments as Map<String, dynamic>;
+        final reportId = args['reportId'] as String;
+        return MaterialPageRoute(
+          builder: (_) => ReportViewerScreen(reportId: reportId),
+        );
+
+      case '/settings':
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
+
+      case '/settings/profile':
+        return MaterialPageRoute(builder: (_) => const ProfileScreen());
+
+      case '/settings/warehouses':
+        return MaterialPageRoute(
+            builder: (_) => const WarehouseSettingsScreen());
 
       default:
         return MaterialPageRoute(

@@ -1,6 +1,6 @@
+// lib/core/services/report_service.dart
 import 'dart:io';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../api/pocketbase_client.dart';
@@ -45,12 +45,60 @@ class ReportService {
         expand: 'generatedBy,inspection',
       );
 
-      return records.map((record) => Report.fromRecord(record)).toList();
+      // Convertir los registros a objetos Report
+      List<Report> reports = [];
+      for (var record in records) {
+        try {
+          reports.add(Report.fromRecord(record));
+        } catch (e) {
+          Logger.error('Error al convertir registro a Report', error: e);
+        }
+      }
+
+      return reports;
     } catch (e) {
       Logger.error('Error al obtener reportes', error: e);
+
       // Intentar obtener datos offline
-      final offlineData = await _offlineSyncService.getOfflineData('reports');
-      return offlineData.map((data) => Report.fromJson(data)).toList();
+      try {
+        final offlineData = await _offlineSyncService.getOfflineData('reports');
+        return offlineData.map((data) => Report.fromJson(data)).toList();
+      } catch (offlineError) {
+        Logger.error('Error al obtener datos offline', error: offlineError);
+        return [];
+      }
+    }
+  }
+
+  // Obtener reporte por ID - CORREGIDO
+  Future<Report?> getReportById(String reportId) async {
+    try {
+      final record = await _pbClient.getRecord('reports', reportId,
+          expand: 'generatedBy,inspection');
+      if (record != null) {
+        return Report.fromRecord(record);
+      }
+      return null;
+    } catch (e) {
+      Logger.error('Error al obtener reporte por ID', error: e);
+
+      // Buscar en datos offline
+      try {
+        final offlineData = await _offlineSyncService.getOfflineData('reports');
+        final matchingReport = offlineData.firstWhere(
+          (data) => data['id'] == reportId,
+          orElse: () => <String, dynamic>{},
+        );
+
+        if (matchingReport.isNotEmpty) {
+          return Report.fromJson(matchingReport);
+        }
+      } catch (offlineError) {
+        Logger.error('Error al buscar reporte en datos offline',
+            error: offlineError);
+      }
+
+      return null;
     }
   }
 
@@ -58,8 +106,12 @@ class ReportService {
   Future<Report> generateReport(Inspection inspection, String generatedById,
       String generatedByName) async {
     try {
+      Logger.info(
+          'Iniciando generación de reporte para inspección: ${inspection.id}');
+
       // Generar PDF con el servicio
       final pdfPath = await _pdfService.generateInspectionReport(inspection);
+      Logger.info('PDF generado en: $pdfPath');
 
       final reportData = {
         'inspection': inspection.id,
@@ -70,26 +122,39 @@ class ReportService {
 
       // Intentar crear reporte en línea
       try {
+        Logger.info('Intentando crear reporte en línea');
+        final file = File(pdfPath);
+
+        if (!await file.exists()) {
+          throw Exception('El archivo PDF no existe en la ruta: $pdfPath');
+        }
+
         final formData = {
           ...reportData,
-          'pdfReport': File(pdfPath),
+          'pdfReport': file,
         };
 
         final record =
             await _pbClient.createRecordWithFiles('reports', reportData, {
-          'pdfReport': [File(pdfPath)]
+          'pdfReport': [file]
         });
 
+        Logger.info('Reporte creado con éxito. ID: ${record.id}');
         return Report.fromRecord(record);
       } catch (e) {
+        Logger.error('Error al crear reporte en línea, guardando offline',
+            error: e);
+
         // Guardar para sincronización offline
         reportData['pdfReport'] = pdfPath;
+        reportData['id'] = 'offline_${DateTime.now().millisecondsSinceEpoch}';
+
         await _offlineSyncService.saveOfflineData(
             'reports', 'create', reportData);
 
         // Para la experiencia del usuario, devolver un objeto con ID temporal
         return Report(
-          id: 'offline_${DateTime.now().millisecondsSinceEpoch}',
+          id: reportData['id'] as String,
           inspectionId: inspection.id,
           generatedAt: DateTime.now(),
           pdfReport: pdfPath,
@@ -99,31 +164,7 @@ class ReportService {
       }
     } catch (e) {
       Logger.error('Error al generar reporte', error: e);
-      rethrow;
-    }
-  }
-
-  // Obtener reporte por ID
-  Future<Report?> getReportById(String reportId) async {
-    try {
-      final record = await _pbClient.getRecord('reports', reportId,
-          expand: 'generatedBy,inspection');
-      return Report.fromRecord(record);
-    } catch (e) {
-      Logger.error('Error al obtener reporte por ID', error: e);
-
-      // Buscar en datos offline
-      final offlineData = await _offlineSyncService.getOfflineData('reports');
-      final matchingReport = offlineData.firstWhere(
-        (data) => data['id'] == reportId,
-        orElse: () => <String, dynamic>{},
-      );
-
-      if (matchingReport.isNotEmpty) {
-        return Report.fromJson(matchingReport);
-      }
-
-      return null;
+      throw Exception('Error al generar reporte: ${e.toString()}');
     }
   }
 
@@ -137,22 +178,26 @@ class ReportService {
         final tempDir = await getTemporaryDirectory();
         final localPath = '${tempDir.path}/report_${report.id}.pdf';
 
-        // Aquí deberías implementar la descarga del archivo
-        // Por simplicidad, asumimos que ya tenemos el archivo local
+        // Implementar descarga del archivo
+        // Por ahora, asumimos que ya tenemos el archivo local
         pdfFile = File(localPath);
+
+        if (!await pdfFile.exists()) {
+          throw Exception('No se pudo descargar el archivo remoto');
+        }
       } else {
         // Es una ruta local
         pdfFile = File(report.pdfReport);
+
+        if (!await pdfFile.exists()) {
+          throw Exception('El archivo del reporte no existe en la ruta local');
+        }
       }
 
-      if (await pdfFile.exists()) {
-        await Share.shareXFiles(
-          [XFile(pdfFile.path)],
-          text: 'Reporte de inspección CTPAT',
-        );
-      } else {
-        throw Exception('El archivo del reporte no existe');
-      }
+      await Share.shareXFiles(
+        [XFile(pdfFile.path)],
+        text: 'Reporte de inspección CTPAT',
+      );
     } catch (e) {
       Logger.error('Error al compartir reporte', error: e);
       rethrow;

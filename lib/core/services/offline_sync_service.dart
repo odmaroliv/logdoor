@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../api/pocketbase_client.dart';
@@ -71,6 +72,7 @@ class OfflineSyncService {
       final connectivityResult = await Connectivity().checkConnectivity();
       if (connectivityResult == ConnectivityResult.none) {
         Logger.warning('No hay conexión para sincronizar');
+        _isSyncing = false;
         return;
       }
 
@@ -82,28 +84,38 @@ class OfflineSyncService {
         if (offlineDataJson == null) continue;
 
         final offlineData = jsonDecode(offlineDataJson) as Map<String, dynamic>;
+        final collection = offlineData['collection'] as String;
 
         try {
           switch (offlineData['action']) {
             case 'create':
-              await _pbClient.createRecord(
-                offlineData['collection'],
-                offlineData['data'],
-              );
+              // Manejar específicamente las inspecciones y reportes
+              if (collection == 'inspections') {
+                await _syncInspection(offlineData['data']);
+              } else if (collection == 'reports') {
+                await _syncReport(offlineData['data']);
+              } else {
+                await _pbClient.createRecord(
+                  collection,
+                  offlineData['data'],
+                );
+              }
               break;
+
             case 'update':
               if (offlineData['recordId'] != null) {
                 await _pbClient.updateRecord(
-                  offlineData['collection'],
+                  collection,
                   offlineData['recordId'],
                   offlineData['data'],
                 );
               }
               break;
+
             case 'delete':
               if (offlineData['recordId'] != null) {
                 await _pbClient.deleteRecord(
-                  offlineData['collection'],
+                  collection,
                   offlineData['recordId'],
                 );
               }
@@ -124,6 +136,77 @@ class OfflineSyncService {
       Logger.error('Error durante sincronización', error: e);
     } finally {
       _isSyncing = false;
+    }
+  }
+
+  // Función especial para sincronizar inspecciones con archivos
+  Future<void> _syncInspection(Map<String, dynamic> data) async {
+    try {
+      // Preparar datos para envío - hace una copia del mapa original
+      final Map<String, dynamic> formData = Map.from(data);
+
+      // Eliminar el ID temporal offline si existe
+      if (formData['id'] != null &&
+          formData['id'].toString().startsWith('offline_')) {
+        formData.remove('id');
+      }
+
+      // Procesar fotos - convertir paths a objetos File
+      if (formData.containsKey('photosPaths')) {
+        List<String> paths = List<String>.from(formData['photosPaths']);
+        List<File> photoFiles = paths.map((path) => File(path)).toList();
+
+        // Reemplazar paths por files
+        formData.remove('photosPaths');
+        formData['photos'] =
+            photoFiles; // PocketBaseClient manejará esto correctamente
+      }
+
+      // Procesar firma - convertir path a objeto File
+      if (formData.containsKey('signaturePath')) {
+        String path = formData['signaturePath'];
+        File signatureFile = File(path);
+
+        // Reemplazar path por file
+        formData.remove('signaturePath');
+        formData['signature'] =
+            signatureFile; // PocketBaseClient manejará esto correctamente
+      }
+
+      // Enviar a la API usando el cliente actualizado
+      Logger.info('Sincronizando inspección: ${formData.keys.join(", ")}');
+      await _pbClient.createRecord('inspections', formData);
+      Logger.info('Inspección sincronizada con archivos');
+    } catch (e) {
+      Logger.error('Error sincronizando inspección con archivos: $e', error: e);
+      throw e;
+    }
+  }
+
+  // Función especial para sincronizar reportes con PDF
+  Future<void> _syncReport(Map<String, dynamic> data) async {
+    try {
+      // Preparar datos para envío - hace una copia del mapa original
+      final Map<String, dynamic> formData = Map.from(data);
+
+      // Procesar path del PDF
+      if (formData.containsKey('pdfReportPath')) {
+        String path = formData['pdfReportPath'];
+        File pdfFile = File(path);
+
+        // Reemplazar path por file
+        formData.remove('pdfReportPath');
+        formData['pdfReport'] =
+            pdfFile; // PocketBaseClient manejará esto correctamente
+      }
+
+      // Enviar a la API
+      Logger.info('Sincronizando reporte PDF');
+      await _pbClient.createRecord('reports', formData);
+      Logger.info('Reporte PDF sincronizado');
+    } catch (e) {
+      Logger.error('Error sincronizando reporte PDF: $e', error: e);
+      throw e;
     }
   }
 

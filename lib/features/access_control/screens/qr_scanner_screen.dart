@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
+import 'package:logdoor/core/services/qr_service.dart';
+import 'package:logdoor/core/utils/logger.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/widgets/loading_indicator.dart';
@@ -14,6 +17,8 @@ class QrScannerScreen extends StatefulWidget {
 class _QrScannerScreenState extends State<QrScannerScreen> {
   final MobileScannerController _scannerController = MobileScannerController();
   bool _isProcessing = false;
+  //bool _torchEnabled = false;
+  final QRService _qrService = QRService();
 
   @override
   void dispose() {
@@ -105,41 +110,74 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
   }
 
   Future<void> _processQrCode(
-      String code, AccessProvider accessProvider) async {
+      String qrContent, AccessProvider accessProvider) async {
     try {
-      final isValid = await accessProvider.verifyAccessCode(code);
+      Logger.info(
+          'Procesando código QR: ${qrContent.substring(0, math.min(20, qrContent.length))}...');
+
+      // Intentar decodificar el QR (maneja tanto QRs normales como seguros)
+      final decodedData = await _qrService.verifyAndDecodeQR(qrContent);
+
+      if (decodedData == null) {
+        if (mounted) {
+          _showAccessResult(
+            title: 'QR Inválido',
+            message: 'Este código QR no es válido o ha sido manipulado.',
+            icon: Icons.error,
+            iconColor: Colors.red,
+          );
+        }
+        return;
+      }
+
+      // Obtener el código de acceso del QR decodificado
+      String accessCode;
+
+      // Si es un QR seguro
+      if (decodedData.containsKey('accessCode')) {
+        accessCode = decodedData['accessCode'];
+      } else {
+        // QR simple
+        accessCode = qrContent;
+      }
+
+      Logger.info('Verificando código de acceso: $accessCode');
+
+      // Verificar en la base de datos
+      final isValid = await accessProvider.verifyAccessCode(accessCode);
 
       if (mounted) {
         if (isValid) {
           // Access valid - show success and option to proceed to inspection
           _showAccessResult(
-            title: 'Access Verified',
-            message:
-                'QR code is valid. Would you like to proceed with inspection?',
+            title: 'Acceso Verificado',
+            message: 'Código QR válido. ¿Desea proceder con la inspección?',
             icon: Icons.check_circle,
             iconColor: Colors.green,
             onConfirm: () {
               Navigator.of(context).pushReplacementNamed(
                 '/inspection/new',
-                arguments: {'accessCode': code},
+                arguments: {'accessCode': accessCode},
               );
             },
           );
         } else {
           // Access invalid
           _showAccessResult(
-            title: 'Invalid Access',
-            message: 'This QR code is not valid or has expired.',
+            title: 'Acceso Inválido',
+            message: 'Este código QR no es válido o ha expirado.',
             icon: Icons.error,
             iconColor: Colors.red,
           );
         }
       }
     } catch (e) {
+      Logger.error('Error al procesar QR', error: e);
+
       if (mounted) {
         _showAccessResult(
           title: 'Error',
-          message: 'Could not verify the QR code. ${e.toString()}',
+          message: 'No se pudo verificar el código QR. ${e.toString()}',
           icon: Icons.warning,
           iconColor: Colors.orange,
         );

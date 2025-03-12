@@ -15,7 +15,10 @@ class WarehouseService {
   }) async {
     try {
       // Construir filtro
-      String filter = onlyActive ? 'isActive = true' : '';
+      String? filter;
+      if (onlyActive) {
+        filter = 'isActive = true';
+      }
 
       // Intentar obtener datos en línea
       try {
@@ -23,8 +26,11 @@ class WarehouseService {
           'warehouses',
           page: page,
           perPage: perPage,
-          // filter: filter,
+          filter: filter, // Ahora puede ser null o un string válido
         );
+
+        // Añade un log para ver la respuesta
+        print("Registros obtenidos de warehouses: ${records.length}");
 
         final warehouses =
             records.map((record) => Warehouse.fromRecord(record)).toList();
@@ -37,6 +43,7 @@ class WarehouseService {
 
         return warehouses;
       } catch (e) {
+        print("Error al obtener datos online: $e");
         // Obtener datos offline
         final offlineData =
             await _offlineSyncService.getOfflineData('warehouses_cache');

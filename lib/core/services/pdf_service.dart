@@ -5,11 +5,15 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
 import '../models/inspection.dart';
 import '../utils/logger.dart';
+import 'dart:typed_data';
 
 class PdfService {
   // Generar un reporte PDF para una inspección
   Future<String> generateInspectionReport(Inspection inspection) async {
     try {
+      Logger.info(
+          'Iniciando generación de PDF para inspección: ${inspection.id}');
+
       final pdf = pw.Document();
 
       // Agregar contenido al reporte
@@ -20,6 +24,7 @@ class PdfService {
             _buildHeader(inspection),
             _buildInspectionDetails(inspection),
             _buildChecklist(inspection),
+            _buildPhotosSection(inspection),
             _buildNotes(inspection),
             _buildSignature(inspection),
           ],
@@ -29,8 +34,12 @@ class PdfService {
 
       // Guardar el PDF en un archivo temporal
       final tempDir = await getTemporaryDirectory();
-      final reportPath = '${tempDir.path}/inspection_${inspection.id}.pdf';
+      final reportName =
+          'inspection_${inspection.id.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')}.pdf';
+      final reportPath = '${tempDir.path}/$reportName';
       final file = File(reportPath);
+
+      Logger.info('Guardando PDF en: $reportPath');
       await file.writeAsBytes(await pdf.save());
 
       Logger.info('Reporte PDF generado: $reportPath');
@@ -174,6 +183,36 @@ class PdfService {
                 )),
           ],
         ),
+      ],
+    );
+  }
+
+  // Nuevo método para incluir fotos en el PDF
+  pw.Widget _buildPhotosSection(Inspection inspection) {
+    if (inspection.photos.isEmpty) {
+      return pw.Container();
+    }
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.SizedBox(height: 20),
+        pw.Text(
+          'Evidence Photos',
+          style: pw.TextStyle(
+            fontSize: 16,
+            fontWeight: pw.FontWeight.bold,
+          ),
+        ),
+        pw.SizedBox(height: 10),
+        pw.Text(
+          'Inspection includes ${inspection.photos.length} photos (not shown in this PDF for size reasons)',
+          style: pw.TextStyle(
+            fontStyle: pw.FontStyle.italic,
+          ),
+        ),
+        // No añadimos las fotos reales al PDF para evitar archivos muy grandes
+        // En una implementación real, podría incluir fotos comprimidas o solo las más relevantes
       ],
     );
   }

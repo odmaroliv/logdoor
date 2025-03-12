@@ -114,25 +114,36 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             Text('Warehouse',
                                 style: Theme.of(context).textTheme.titleMedium),
                             const SizedBox(height: 8),
-                            DropdownButtonFormField<Warehouse>(
-                              value: _selectedWarehouse,
+                            DropdownButtonFormField<String>(
+                              value: _selectedWarehouse
+                                  ?.id, // Usar ID en lugar del objeto completo
                               decoration: const InputDecoration(
+                                labelText: 'Seleccione un almacén',
                                 border: OutlineInputBorder(),
                                 contentPadding: EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 8),
                               ),
                               items:
                                   settingsProvider.warehouses.map((warehouse) {
-                                return DropdownMenuItem<Warehouse>(
-                                  value: warehouse,
+                                return DropdownMenuItem<String>(
+                                  value: warehouse.id, // Usar ID como valor
                                   child: Text(warehouse.name),
                                 );
                               }).toList(),
-                              onChanged: (warehouse) {
-                                setState(() {
-                                  _selectedWarehouse = warehouse;
-                                });
-                                _loadDashboardData();
+                              onChanged: (warehouseId) {
+                                if (warehouseId != null) {
+                                  final warehouse =
+                                      settingsProvider.warehouses.firstWhere(
+                                    (w) => w.id == warehouseId,
+                                    orElse: () =>
+                                        settingsProvider.warehouses.first,
+                                  );
+
+                                  setState(() {
+                                    _selectedWarehouse = warehouse;
+                                  });
+                                  _loadDashboardData();
+                                }
                               },
                             ),
                             const SizedBox(height: 16),

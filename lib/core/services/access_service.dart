@@ -168,27 +168,28 @@ class AccessService {
     }
   }
 
-  // Verificar código de acceso
   Future<Access?> verifyAccessCode(String accessCode) async {
     try {
-      // Intentar verificar en línea
+      // Intento de verificación en línea
       try {
+        // Usamos el helper pb.filter para construir el filtro de forma segura
+        final filterStr =
+            _pbClient.pb.filter('accessCode = {:code}', {'code': accessCode});
+
         final records = await _pbClient.getRecords(
           'accesses',
-          filter: 'accessCode = "$accessCode"',
+          filter: filterStr,
           expand: 'user,warehouse',
         );
 
         if (records.isNotEmpty) {
           final record = records.first;
-
-          // Extraer nombre de usuario y almacén
+          // Extraer información adicional de la expansión (si existe)
           String userName = 'Unknown';
           String warehouseName = 'Unknown';
 
           final expand = record.expand;
           if (expand != null) {
-            // Verificar y procesar expand de user
             final userList = expand['user'];
             if (userList != null && userList.isNotEmpty) {
               final userData = userList.first.data;
@@ -196,8 +197,6 @@ class AccessService {
                 userName = userData['name'] as String? ?? 'Unknown';
               }
             }
-
-            // Verificar y procesar expand de warehouse
             final warehouseList = expand['warehouse'];
             if (warehouseList != null && warehouseList.isNotEmpty) {
               final warehouseData = warehouseList.first.data;
@@ -221,21 +220,20 @@ class AccessService {
             isSync: record.data['isSync'] ?? true,
           );
         }
-      } catch (e) {
-        // Verificación offline
+      } catch (onlineError) {
+        // Si ocurre un error en línea, se intenta la verificación offline
+        print('Error en la verificación en línea: $onlineError');
         final offlineData =
             await _offlineSyncService.getOfflineData('accesses');
         final matchingAccess = offlineData.firstWhere(
           (data) => data['accessCode'] == accessCode,
           orElse: () => <String, dynamic>{},
         );
-
         if (matchingAccess.isNotEmpty) {
           return Access.fromJson(matchingAccess);
         }
       }
-
-      return null; // No se encontró el código
+      return null; // No se encontró el registro
     } catch (e) {
       print('Error al verificar código de acceso: $e');
       return null;

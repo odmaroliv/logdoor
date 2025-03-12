@@ -1,4 +1,4 @@
-// lib/app.dart
+// lib/app.dart actualizado con soporte para tema oscuro
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -80,27 +80,35 @@ class _LogdoorAppState extends State<LogdoorApp> {
         ChangeNotifierProvider(create: (_) => AccessProvider()),
         ChangeNotifierProvider(create: (_) => InspectionProvider()),
         ChangeNotifierProvider(create: (_) => ReportProvider()),
-        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()..init()),
       ],
-      child: MaterialApp(
-        title: 'Logdoor',
-        theme: appTheme,
-        locale: _appLocale,
-        home: const AuthGuard(),
+      child: Consumer<SettingsProvider>(
+        builder: (context, settingsProvider, _) {
+          return MaterialApp(
+            title: 'Logdoor',
+            theme: appLightTheme,
+            darkTheme: appDarkTheme,
+            themeMode:
+                settingsProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            locale: settingsProvider.appLocale,
+            home: const AuthGuard(),
 
-        // Configuración de localización
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: LocalizationService.supportedLocales,
-        localeResolutionCallback: LocalizationService.localeResolutionCallback,
+            // Configuración de localización
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: LocalizationService.supportedLocales,
+            localeResolutionCallback:
+                LocalizationService.localeResolutionCallback,
 
-        // Usar el sistema de rutas definido
-        initialRoute: '/',
-        onGenerateRoute: AppRouter.generateRoute,
+            // Usar el sistema de rutas definido
+            initialRoute: '/',
+            onGenerateRoute: AppRouter.generateRoute,
+          );
+        },
       ),
     );
   }

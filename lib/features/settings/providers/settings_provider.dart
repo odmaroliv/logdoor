@@ -7,6 +7,7 @@ import '../../../core/models/user.dart';
 import '../../../core/services/warehouse_service.dart';
 import '../../../core/services/user_service.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/utils/logger.dart';
 
 class SettingsProvider extends ChangeNotifier {
   final WarehouseService _warehouseService = WarehouseService();
@@ -37,22 +38,28 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      Logger.info('Inicializando configuraciones...');
+
       // Cargar preferencias
       final prefs = await SharedPreferences.getInstance();
 
       // Cargar tema
       _isDarkMode = prefs.getBool('dark_mode') ?? false;
+      Logger.info('Modo oscuro cargado: $_isDarkMode');
 
       // Cargar idioma
       final savedLocale = await LocalizationService.getPreferredLocale();
       _appLocale = savedLocale;
+      Logger.info('Locale cargado: ${_appLocale.languageCode}');
 
       // Verificar si biometría está habilitada
       _isBiometricsEnabled = await _authService.isBiometricsEnabled();
+      Logger.info('Biometría habilitada: $_isBiometricsEnabled');
 
       // Cargar datos del usuario actual
       if (_authService.currentUser != null) {
         _currentUser = _authService.currentUser;
+        Logger.info('Usuario actual cargado: ${_currentUser?.name}');
       }
 
       // Cargar almacenes
@@ -61,6 +68,7 @@ class SettingsProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      Logger.error('Error al inicializar configuraciones', error: e);
       _isLoading = false;
       _error = 'Error al inicializar configuraciones: ${e.toString()}';
       notifyListeners();
@@ -74,14 +82,18 @@ class SettingsProvider extends ChangeNotifier {
 
     try {
       _warehouses = await _warehouseService.getWarehouses();
+      Logger.info('${_warehouses.length} almacenes cargados');
 
       if (_warehouses.isNotEmpty && _selectedWarehouse == null) {
         _selectedWarehouse = _warehouses.first;
+        Logger.info(
+            'Almacén seleccionado por defecto: ${_selectedWarehouse?.name}');
       }
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      Logger.error('Error al cargar almacenes', error: e);
       _isLoading = false;
       _error = 'Error al cargar almacenes: ${e.toString()}';
       notifyListeners();
@@ -91,24 +103,40 @@ class SettingsProvider extends ChangeNotifier {
   // Seleccionar almacén
   void selectWarehouse(Warehouse warehouse) {
     _selectedWarehouse = warehouse;
+    Logger.info('Almacén seleccionado: ${warehouse.name}');
     notifyListeners();
   }
 
   // Cambiar tema
   Future<void> toggleDarkMode() async {
-    _isDarkMode = !_isDarkMode;
+    try {
+      _isDarkMode = !_isDarkMode;
+      Logger.info('Modo oscuro cambiado a: $_isDarkMode');
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('dark_mode', _isDarkMode);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('dark_mode', _isDarkMode);
+      Logger.info('Preferencia de modo oscuro guardada');
 
-    notifyListeners();
+      notifyListeners();
+    } catch (e) {
+      Logger.error('Error al cambiar tema', error: e);
+      _error = 'Error al cambiar tema: ${e.toString()}';
+      notifyListeners();
+    }
   }
 
   // Cambiar idioma
   Future<void> changeLanguage(String languageCode) async {
-    await LocalizationService.changeLanguage(languageCode);
-    _appLocale = await LocalizationService.getPreferredLocale();
-    notifyListeners();
+    try {
+      await LocalizationService.changeLanguage(languageCode);
+      _appLocale = await LocalizationService.getPreferredLocale();
+      Logger.info('Idioma cambiado a: ${_appLocale.languageCode}');
+      notifyListeners();
+    } catch (e) {
+      Logger.error('Error al cambiar idioma', error: e);
+      _error = 'Error al cambiar idioma: ${e.toString()}';
+      notifyListeners();
+    }
   }
 
   // Habilitar/deshabilitar biometría
@@ -120,15 +148,18 @@ class SettingsProvider extends ChangeNotifier {
       if (_isBiometricsEnabled) {
         await _authService.disableBiometrics();
         _isBiometricsEnabled = false;
+        Logger.info('Biometría deshabilitada');
       } else {
         await _authService.enableBiometrics(password);
         _isBiometricsEnabled = true;
+        Logger.info('Biometría habilitada');
       }
 
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
+      Logger.error('Error al modificar biometría', error: e);
       _isLoading = false;
       _error = 'Error al modificar biometría: ${e.toString()}';
       notifyListeners();
@@ -142,13 +173,19 @@ class SettingsProvider extends ChangeNotifier {
     String? email,
     String? phoneNumber,
   }) async {
-    if (_currentUser == null) return false;
+    if (_currentUser == null) {
+      Logger.warning(
+          'No se puede actualizar el perfil: usuario no inicializado');
+      return false;
+    }
 
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
+      Logger.info('Actualizando perfil para usuario: ${_currentUser?.id}');
+
       final updatedUser = await _userService.updateUser(
         userId: _currentUser!.id,
         name: name,
@@ -157,10 +194,13 @@ class SettingsProvider extends ChangeNotifier {
       );
 
       _currentUser = updatedUser;
+      Logger.info('Perfil actualizado con éxito');
+
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
+      Logger.error('Error al actualizar perfil', error: e);
       _isLoading = false;
       _error = 'Error al actualizar perfil: ${e.toString()}';
       notifyListeners();
@@ -173,13 +213,19 @@ class SettingsProvider extends ChangeNotifier {
     required String currentPassword,
     required String newPassword,
   }) async {
-    if (_currentUser == null) return false;
+    if (_currentUser == null) {
+      Logger.warning(
+          'No se puede actualizar la contraseña: usuario no inicializado');
+      return false;
+    }
 
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
+      Logger.info('Actualizando contraseña para usuario: ${_currentUser?.id}');
+
       final result = await _userService.updatePassword(
         userId: _currentUser!.id,
         currentPassword: currentPassword,
@@ -188,8 +234,16 @@ class SettingsProvider extends ChangeNotifier {
 
       _isLoading = false;
       notifyListeners();
+
+      if (result) {
+        Logger.info('Contraseña actualizada con éxito');
+      } else {
+        Logger.warning('No se pudo actualizar la contraseña');
+      }
+
       return result;
     } catch (e) {
+      Logger.error('Error al actualizar contraseña', error: e);
       _isLoading = false;
       _error = 'Error al actualizar contraseña: ${e.toString()}';
       notifyListeners();
@@ -210,6 +264,8 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      Logger.info('Creando nuevo almacén: $name');
+
       final warehouse = await _warehouseService.createWarehouse(
         name: name,
         location: location,
@@ -219,10 +275,13 @@ class SettingsProvider extends ChangeNotifier {
       );
 
       _warehouses.add(warehouse);
+      Logger.info('Almacén creado con éxito: ${warehouse.id}');
+
       _isLoading = false;
       notifyListeners();
       return warehouse;
     } catch (e) {
+      Logger.error('Error al crear almacén', error: e);
       _isLoading = false;
       _error = 'Error al crear almacén: ${e.toString()}';
       notifyListeners();
@@ -238,6 +297,7 @@ class SettingsProvider extends ChangeNotifier {
     String? address,
     Map<String, dynamic>? coordinates,
     String? description,
+    bool? isActive,
   }) async {
     _isLoading = true;
     _error = null;
@@ -251,6 +311,7 @@ class SettingsProvider extends ChangeNotifier {
         address: address,
         coordinates: coordinates,
         description: description,
+        isActive: isActive,
       );
 
       // Actualizar almacén en la lista
@@ -282,16 +343,21 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      Logger.info('Desactivando almacén: $warehouseId');
+
       final result = await _warehouseService.deactivateWarehouse(warehouseId);
 
       if (result) {
         // Remover almacén de la lista
         _warehouses.removeWhere((w) => w.id == warehouseId);
+        Logger.info('Almacén removido de la lista');
 
         // Si el almacén seleccionado fue desactivado, seleccionar otro
         if (_selectedWarehouse?.id == warehouseId) {
           _selectedWarehouse =
               _warehouses.isNotEmpty ? _warehouses.first : null;
+          Logger.info(
+              'Seleccionado nuevo almacén por defecto: ${_selectedWarehouse?.name}');
         }
       }
 
@@ -299,6 +365,7 @@ class SettingsProvider extends ChangeNotifier {
       notifyListeners();
       return result;
     } catch (e) {
+      Logger.error('Error al desactivar almacén', error: e);
       _isLoading = false;
       _error = 'Error al desactivar almacén: ${e.toString()}';
       notifyListeners();

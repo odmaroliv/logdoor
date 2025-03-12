@@ -5,6 +5,7 @@ import '../models/inspection.dart';
 import 'offline_sync_service.dart';
 import 'geolocation_service.dart';
 import '../utils/connectivity_utils.dart';
+import '../utils/logger.dart';
 import 'pdf_service.dart';
 
 class InspectionService {
@@ -54,6 +55,7 @@ class InspectionService {
         return offlineData.map((data) => Inspection.fromJson(data)).toList();
       }
     } catch (e) {
+      Logger.error('Error al obtener inspecciones', error: e);
       // Fallback to offline if API fails
       final offlineData =
           await _offlineSyncService.getOfflineData('inspections');
@@ -88,21 +90,20 @@ class InspectionService {
       };
 
       if (isOnline) {
-        // Upload inspection with files
+        // Online mode: Upload to server directly
+        Logger.info('Enviando inspección en modo online');
+        Logger.info('🔍 accessId enviado: "$accessId"');
+        Logger.info('🔍 inspectorId enviado: "$inspectorId"');
+        // Ahora podemos pasar los archivos directamente
+        // El PocketBaseClient actualizado manejará los objetos File y XFile correctamente
         final formData = {
           ...inspectionData,
+          'signature':
+              File(signaturePath), // Pasar el archivo de firma directamente
+          'photos': photos, // Pasar la lista de XFile directamente
         };
 
-        // Add signature file
-        final signatureFile = File(signaturePath);
-        formData['signature'] = signatureFile;
-
-        // Add photos
-        List<File> photoFiles =
-            photos.map((xFile) => File(xFile.path)).toList();
-        formData['photos'] = photoFiles;
-
-        // Create record with files
+        // Usar el PocketBaseClient actualizado que maneja archivos
         final record = await _pbClient.createRecord('inspections', formData);
 
         // Generate PDF report
@@ -111,43 +112,61 @@ class InspectionService {
 
         return inspection;
       } else {
-        // Store locally for sync later
-        // For simplicity, store photo paths and signature path for now
-        // In a real implementation, you might want to copy these files to app storage
-        inspectionData['photos'] = photos.map((p) => p.path).toList();
-        inspectionData['signature'] = signaturePath;
+        // Offline mode: Store locally for later sync
+        Logger.info('Guardando inspección en modo offline');
 
+        // En modo offline, guardar solo las rutas
+        final Map<String, dynamic> offlineData = {
+          ...inspectionData,
+          'photosPaths': photos.map((p) => p.path).toList(),
+          'signaturePath': signaturePath,
+        };
+
+        // Generar un ID temporal para la inspección offline
+        final offlineId = 'offline_${DateTime.now().millisecondsSinceEpoch}';
+        offlineData['id'] = offlineId;
+
+        // Guardar para sincronización posterior
         await _offlineSyncService.saveOfflineData(
-            'inspections', 'create', inspectionData);
+          'inspections',
+          'create',
+          offlineData,
+        );
+        Logger.info('🔍 accessId enviado: "$accessId"');
+        Logger.info('🔍 inspectorId enviado: "$inspectorId"');
 
-        // Create a temporary ID for offline storage
-        inspectionData['id'] =
-            'offline_${DateTime.now().millisecondsSinceEpoch}';
-
-        return Inspection.fromJson(inspectionData);
+        // Crear objeto Inspection a partir de los datos offline
+        return Inspection.fromJson(offlineData);
       }
     } catch (e) {
-      // Store offline on API error
-      final inspectionData = {
+      Logger.error('Error al enviar inspección: $e', error: e);
+
+      // Guardar offline en caso de error
+      final Map<String, dynamic> offlineData = {
         'access': accessId,
         'inspector': inspectorId,
         'inspectorName': inspectorName,
         'timestamp': timestamp.toIso8601String(),
         'checklist': checklist,
-        'photos': photos.map((p) => p.path).toList(),
-        'signature': signaturePath,
+        'photosPaths': photos.map((p) => p.path).toList(),
+        'signaturePath': signaturePath,
         'status': 'completed',
         'notes': notes,
         'isSync': false,
       };
 
+      // Generar un ID temporal para la inspección offline
+      final offlineId = 'offline_${DateTime.now().millisecondsSinceEpoch}';
+      offlineData['id'] = offlineId;
+
+      // Guardar para sincronización posterior
       await _offlineSyncService.saveOfflineData(
-          'inspections', 'create', inspectionData);
+        'inspections',
+        'create',
+        offlineData,
+      );
 
-      // Create a temporary ID for offline storage
-      inspectionData['id'] = 'offline_${DateTime.now().millisecondsSinceEpoch}';
-
-      return Inspection.fromJson(inspectionData);
+      return Inspection.fromJson(offlineData);
     }
   }
 
@@ -157,37 +176,35 @@ class InspectionService {
       // Generate PDF
       final pdfPath = await _pdfService.generateInspectionReport(inspection);
 
-      // Upload PDF to reports collection
+      // Upload PDF to reports collection if online
       if (await _connectivityUtils.isConnected()) {
         final reportData = {
           'inspection': inspection.id,
           'generatedAt': DateTime.now().toIso8601String(),
           'generatedBy': inspection.inspectorId,
+          'pdfReport': File(pdfPath), // Pasar el archivo directamente
         };
 
-        final formData = {
-          ...reportData,
-          'pdfReport': File(pdfPath),
-        };
-
-        await _pbClient.createRecord('reports', formData);
+        await _pbClient.createRecord('reports', reportData);
       } else {
         // Store for later upload
         final reportData = {
           'inspection': inspection.id,
           'generatedAt': DateTime.now().toIso8601String(),
           'generatedBy': inspection.inspectorId,
-          'pdfReport': pdfPath,
+          'pdfReportPath': pdfPath,
         };
 
         await _offlineSyncService.saveOfflineData(
-            'reports', 'create', reportData);
+          'reports',
+          'create',
+          reportData,
+        );
       }
 
       return pdfPath;
     } catch (e) {
-      // Handle error
-      print('Error generating report: $e');
+      Logger.error('Error al generar reporte PDF: $e', error: e);
       throw e;
     }
   }

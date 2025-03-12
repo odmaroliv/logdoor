@@ -312,26 +312,16 @@ class _InspectionFormScreenState extends State<InspectionFormScreen> {
 
   Future<void> _submitInspection(InspectionProvider provider) async {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
-      // Validate that all checklist items have been completed
       final formData = _formKey.currentState!.value;
-      final checklist = formData['checklist'] as Map<String, dynamic>?;
 
-      if (checklist == null || checklist.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please complete the checklist')),
-        );
-        return;
-      }
-
-      // Check that all items have a status
+      // Validar que cada ítem tenga un estado
       bool allItemsHaveStatus = true;
       for (var item in _checklistItems) {
-        final key = item['key'];
-        final itemData = checklist[key] as Map<String, dynamic>?;
-
-        if (itemData == null ||
-            itemData['status'] == null ||
-            itemData['status'].isEmpty) {
+        final key = item['key']; // ej. "front_bumper"
+        final statusKey = 'checklist.$key.status';
+        final statusValue = formData[statusKey];
+        if (statusValue == null ||
+            (statusValue is String && statusValue.trim().isEmpty)) {
           allItemsHaveStatus = false;
           break;
         }
@@ -340,7 +330,8 @@ class _InspectionFormScreenState extends State<InspectionFormScreen> {
       if (!allItemsHaveStatus) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Please provide a status for all checklist items')),
+            content: Text('Please provide a status for all checklist items'),
+          ),
         );
         return;
       }
@@ -367,12 +358,26 @@ class _InspectionFormScreenState extends State<InspectionFormScreen> {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         final geolocation = await GeolocationService().getCurrentLocation();
 
-        // Create inspection data
+        // Construir un mapa "checklist" agrupando las claves
+        final checklist = <String, Map<String, dynamic>>{};
+        formData.forEach((key, value) {
+          if (key.toString().startsWith('checklist.')) {
+            // Esperamos el formato "checklist.{itemKey}.{property}"
+            final parts = key.toString().split('.');
+            if (parts.length >= 3) {
+              final itemKey = parts[1];
+              final property = parts[2];
+              checklist.putIfAbsent(itemKey, () => {});
+              checklist[itemKey]![property] = value;
+            }
+          }
+        });
+
         final inspectionData = {
           'access': _access?.id ?? 'manual_inspection',
           'inspector': authProvider.currentUser!.id,
           'inspectorName': authProvider.currentUser!.name,
-          'checklist': formData['checklist'],
+          'checklist': checklist,
           'notes': formData['notes'],
           'timestamp': DateTime.now().toIso8601String(),
           'geolocation': {
@@ -388,7 +393,6 @@ class _InspectionFormScreenState extends State<InspectionFormScreen> {
           signaturePath: _signatureImagePath!,
         );
 
-        // Show success and navigate back
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Inspection submitted successfully')),
