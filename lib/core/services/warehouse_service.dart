@@ -23,7 +23,7 @@ class WarehouseService {
           'warehouses',
           page: page,
           perPage: perPage,
-          filter: filter,
+          // filter: filter,
         );
 
         final warehouses =

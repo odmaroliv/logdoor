@@ -1,8 +1,10 @@
 // lib/core/api/pocketbase_client.dart
+import 'package:logdoor/core/utils/exceptions.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/logger.dart';
 import '../utils/secure_storage.dart';
+import 'dart:convert';
 
 class PocketBaseClient {
   static final PocketBaseClient _instance = PocketBaseClient._internal();
@@ -10,7 +12,7 @@ class PocketBaseClient {
 
   late PocketBase pb;
   final String baseUrl =
-      'http://YOUR_POCKETBASE_URL:8090'; // Cambiar a la URL correcta en producción
+      'https://odkm.pockethost.io'; // Cambiar a la URL correcta en producción
   final SecureStorage _secureStorage = SecureStorage();
 
   PocketBaseClient._internal() {
@@ -23,8 +25,14 @@ class PocketBaseClient {
     final authToken = await _secureStorage.read(key: 'pb_auth_token');
 
     if (authData != null && authToken != null) {
+      // Deserializa el String authData a un Map<String, dynamic>
+      final authDataMap = jsonDecode(authData) as Map<String, dynamic>;
+
+      // Usa el método fromJson para crear un RecordModel a partir del Map
+      final recordModel = RecordModel.fromJson(authDataMap);
+
       // Usa el método correcto para restaurar la sesión
-      pb.authStore.save(authToken, authData);
+      pb.authStore.save(authToken, recordModel);
     }
 
     // Escuchar cambios de autenticación
@@ -46,16 +54,39 @@ class PocketBaseClient {
     try {
       return await pb.collection('users').authWithPassword(email, password);
     } catch (e) {
+      // Verificar si es un error MFA
+      if (e is ClientException &&
+          e.response != null &&
+          e.response['mfaId'] != null) {
+        // Guardar el ID MFA para uso posterior
+        final mfaId = e.response['mfaId'];
+
+        // Puedes guardar el mfaId para usarlo en el paso de verificación MFA
+        await _secureStorage.write(key: 'mfa_id', value: mfaId);
+        print('mfaId stored: $mfaId'); // Verifica si se guarda correctamente
+        // Lanzar una excepción específica para MFA que tu app pueda manejar
+        throw MfaRequiredException(mfaId, email);
+      }
+
       Logger.error('Error en inicio de sesión', error: e);
       rethrow;
     }
   }
 
-  Future<bool> verifyMFA(String userId, String code) async {
+  Future<bool> verifyMFA(String code) async {
     try {
-      // Corregido: pasar el código como parte del body
-      await pb.collection('users').authRefresh(body: {"code": code});
-      return true;
+      // Obtener el ID MFA guardado previamente
+      final mfaId = await _secureStorage.read(key: 'mfa_id');
+      if (mfaId == null) {
+        throw Exception('No hay sesión MFA activa');
+      }
+
+      // Enviar el código al endpoint correcto con el ID MFA
+      final result = await pb.send('/api/collections/users/auth-verify',
+          method: 'POST', body: {"mfaId": mfaId, "code": code});
+
+      // Si tenemos éxito, la API debería devolver un token y actualizar el AuthStore
+      return pb.authStore.isValid;
     } catch (e) {
       Logger.error('Error en verificación MFA', error: e);
       return false;
@@ -87,16 +118,16 @@ class PocketBaseClient {
     int perPage = 50,
     String sortField = 'created',
     String sortOrder = 'desc',
-    String filter = '',
-    String expand = '',
+    String? filter,
+    String? expand,
   }) async {
     try {
       final result = await pb.collection(collection).getList(
             page: page,
             perPage: perPage,
             sort: '$sortField $sortOrder',
-            filter: filter,
-            expand: expand,
+            filter: filter ?? '', // Evitar filtro vacío
+            expand: expand ?? '', // Evitar expand vacío
           );
 
       return result.items;

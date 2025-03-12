@@ -178,40 +178,51 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     Text('Overview',
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 8),
-                    GridView.count(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 1.5,
-                      children: [
-                        StatsCard(
-                          title: 'Total Access',
-                          value: dashboardProvider.totalAccess.toString(),
-                          icon: Icons.door_sliding,
-                          color: Colors.blue,
-                        ),
-                        StatsCard(
-                          title: 'Inspections',
-                          value: dashboardProvider.totalInspections.toString(),
-                          icon: Icons.checklist,
-                          color: Colors.green,
-                        ),
-                        StatsCard(
-                          title: 'Alerts',
-                          value: dashboardProvider.totalAlerts.toString(),
-                          icon: Icons.warning,
-                          color: Colors.orange,
-                        ),
-                        StatsCard(
-                          title: 'Issue Rate',
-                          value:
-                              '${dashboardProvider.issueRate.toStringAsFixed(1)}%',
-                          icon: Icons.report_problem,
-                          color: Colors.red,
-                        ),
-                      ],
+
+                    // Adjust Grid for Responsiveness
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        int crossAxisCount = 2; // Default to 2 columns
+                        if (constraints.maxWidth > 600) {
+                          crossAxisCount = 4; // Larger screens
+                        }
+                        return GridView.count(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 1.5,
+                          children: [
+                            StatsCard(
+                              title: 'Total Access',
+                              value: dashboardProvider.totalAccess.toString(),
+                              icon: Icons.door_sliding,
+                              color: Colors.blue,
+                            ),
+                            StatsCard(
+                              title: 'Inspections',
+                              value:
+                                  dashboardProvider.totalInspections.toString(),
+                              icon: Icons.checklist,
+                              color: Colors.green,
+                            ),
+                            StatsCard(
+                              title: 'Alerts',
+                              value: dashboardProvider.totalAlerts.toString(),
+                              icon: Icons.warning,
+                              color: Colors.orange,
+                            ),
+                            StatsCard(
+                              title: 'Issue Rate',
+                              value:
+                                  '${dashboardProvider.issueRate.toStringAsFixed(1)}%',
+                              icon: Icons.report_problem,
+                              color: Colors.red,
+                            ),
+                          ],
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 24),

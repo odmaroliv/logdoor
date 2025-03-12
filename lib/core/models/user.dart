@@ -23,11 +23,15 @@ class User {
 
   factory User.fromRecord(dynamic record) {
     return User(
-      id: record.id,
-      name: record.data['name'],
-      email: record.data['email'],
-      role: record.data['role'],
-      phoneNumber: record.data['phoneNumber'],
+      id: record.id?.toString() ?? '', // Convierte a String si es necesario
+      name: record.data['name']?.toString() ??
+          '', // Convierte a String si es necesario
+      email: record.data['email']?.toString() ??
+          '', // Convierte a String si es necesario
+      role: record.data['role']?.toString() ??
+          '', // Convierte a String si es necesario
+      phoneNumber: record.data['phoneNumber']
+          ?.toString(), // Convierte a String si es necesario
       biometricData: record.data['biometricData'],
       profilePicture: record.data['profilePicture'],
       created: DateTime.parse(record.created),
@@ -37,11 +41,15 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      role: json['role'],
-      phoneNumber: json['phoneNumber'],
+      id: json['id']?.toString() ?? '', // Convierte a String si es necesario
+      name:
+          json['name']?.toString() ?? '', // Convierte a String si es necesario
+      email:
+          json['email']?.toString() ?? '', // Convierte a String si es necesario
+      role:
+          json['role']?.toString() ?? '', // Convierte a String si es necesario
+      phoneNumber:
+          json['phoneNumber']?.toString(), // Convierte a String si es necesario
       biometricData: json['biometricData'],
       profilePicture: json['profilePicture'],
       created: DateTime.parse(json['created']),

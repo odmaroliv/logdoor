@@ -1,4 +1,6 @@
 import 'package:local_auth/local_auth.dart';
+import 'package:logdoor/core/utils/exceptions.dart';
+import 'package:pocketbase/pocketbase.dart';
 import '../api/pocketbase_client.dart';
 import '../models/user.dart';
 import '../utils/secure_storage.dart';
@@ -23,6 +25,7 @@ class AuthService {
   }
 
   // Iniciar sesión con email y contraseña
+  // En AuthService
   Future<User> login(String email, String password) async {
     try {
       final auth = await _pbClient.signIn(email, password);
@@ -30,21 +33,47 @@ class AuthService {
       return _currentUser!;
     } catch (e) {
       Logger.error('Error en login', error: e);
+
+      // Verificar si es un error que contiene mfaId
+      if (e is ClientException) {
+        // Extraer el mfaId de la respuesta
+        final response = e.response;
+        if (response is Map && response.containsKey('mfaId')) {
+          final mfaId = response['mfaId'] as String;
+          throw MfaRequiredException(mfaId, email);
+        }
+      }
+
       rethrow;
     }
   }
 
-  // Verificar código MFA
-  Future<bool> verifyMFA(String code) async {
+  Future<void> requestOtp(String email) async {
     try {
-      if (_currentUser == null) {
-        throw Exception('Usuario no iniciado');
+      // Llamada a la API para solicitar el OTP
+      await _pbClient.pb.collection('users').requestOTP(email);
+    } catch (e) {
+      throw Exception('Error al solicitar OTP: $e');
+    }
+  }
+
+  // En AuthService
+  Future<bool> verifyMFA(String otpId, String code) async {
+    try {
+      // Usar el método authWithOTP para validar el código
+      final authData =
+          await _pbClient.pb.collection('users').authWithOTP(otpId, code);
+
+      if (authData != null && _pbClient.pb.authStore.isValid) {
+        // Si la autenticación es exitosa, actualiza el usuario actual
+        _currentUser = User.fromRecord(authData.record!);
+        return true;
       }
 
-      return await _pbClient.verifyMFA(_currentUser!.id, code);
+      return false;
     } catch (e) {
       Logger.error('Error en verificación MFA', error: e);
-      rethrow;
+      return false;
     }
   }
 

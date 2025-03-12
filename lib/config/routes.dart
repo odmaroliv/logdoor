@@ -30,6 +30,7 @@ class AppRouter {
           builder: (_) => MfaScreen(
             email: args?['email'] ?? '',
             password: args?['password'] ?? '',
+            otpId: args?['otpId'] ?? '', // Añadir este parámetro
           ),
         );
 

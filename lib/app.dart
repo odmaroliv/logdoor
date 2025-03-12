@@ -111,10 +111,10 @@ class AuthGuard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-
+    // No obtengas el provider aquí, solo construye el FutureBuilder
     return FutureBuilder<bool>(
-      future: authProvider.checkAuth(),
+      // Obten el provider directamente dentro del future
+      future: Provider.of<AuthProvider>(context, listen: false).checkAuth(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -125,6 +125,9 @@ class AuthGuard extends StatelessWidget {
         }
 
         if (snapshot.hasData && snapshot.data == true) {
+          // Usa el Provider.of con listen:false para evitar reconstrucciones
+          final authProvider =
+              Provider.of<AuthProvider>(context, listen: false);
           // Si el usuario está autenticado, redirigir basado en su rol
           if (authProvider.currentUser != null) {
             if (authProvider.currentUser!.isAdmin) {

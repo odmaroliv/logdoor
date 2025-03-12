@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logdoor/core/utils/exceptions.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -147,25 +148,55 @@ class _LoginFormState extends State<LoginForm> {
 
         if (mounted) {
           if (success) {
-            // Verificar si se requiere MFA
-            // Para simplificar, asumimos que siempre vamos directo al dashboard
-            // En una implementación real, verificaríamos si se necesita MFA
-
-            // Navegar al dashboard según el rol
-            final user = authProvider.currentUser;
-            if (user != null) {
-              if (user.isAdmin) {
-                Navigator.of(context).pushReplacementNamed('/dashboard/admin');
-              } else if (user.isInspector) {
-                Navigator.of(context)
-                    .pushReplacementNamed('/dashboard/inspector');
-              } else if (user.isGuard) {
-                Navigator.of(context).pushReplacementNamed('/dashboard/guard');
-              } else {
-                Navigator.of(context).pushReplacementNamed('/access/list');
+            // Si el login fue exitoso y MFA no es requerido, navegar al dashboard
+            if (!authProvider.requiresMfa) {
+              final user = authProvider.currentUser;
+              if (user != null) {
+                if (user.isAdmin) {
+                  Navigator.of(context)
+                      .pushReplacementNamed('/dashboard/admin');
+                } else if (user.isInspector) {
+                  Navigator.of(context)
+                      .pushReplacementNamed('/dashboard/inspector');
+                } else if (user.isGuard) {
+                  Navigator.of(context)
+                      .pushReplacementNamed('/dashboard/guard');
+                } else {
+                  Navigator.of(context).pushReplacementNamed('/access/list');
+                }
               }
+            } else {
+              // Si MFA es requerido, redirigir a la pantalla MFA
+              Navigator.of(context).pushNamed(
+                '/mfa',
+                arguments: {
+                  'email': email,
+                  'password': password,
+                  // Aquí pasas el mfaId al capturar la excepción
+                  'otpId': authProvider
+                      .mfaId, // Esto debe estar en authProvider después de la autenticación inicial
+                },
+              );
             }
           }
+        }
+      } catch (e) {
+        if (e is MfaRequiredException) {
+          // Aquí manejas el error MFA si no fue capturado antes
+          print("MFA ID: " + e.mfaId);
+          Navigator.of(context).pushNamed(
+            '/mfa',
+            arguments: {
+              'email': email,
+              'password': password,
+              'otpId': e.mfaId, // Aquí pasas el mfaId desde la excepción
+            },
+          );
+        } else {
+          // Manejar otros errores
+          setState(() {
+            // _error = e.toString(); // Si quieres mostrar el error
+          });
         }
       } finally {
         if (mounted) {

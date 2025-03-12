@@ -3,15 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import '../providers/auth_provider.dart';
+import 'dart:async'; // Importar Timer
 
 class MfaScreen extends StatefulWidget {
   final String email;
   final String password;
+  final String otpId;
 
   const MfaScreen({
     Key? key,
     required this.email,
     required this.password,
+    required this.otpId,
   }) : super(key: key);
 
   @override
@@ -25,6 +28,7 @@ class _MfaScreenState extends State<MfaScreen> {
   String? _error;
   int _remainingSeconds = 30;
   bool _canResend = false;
+  Timer? _timer; // Agregar el timer
 
   @override
   void initState() {
@@ -32,24 +36,24 @@ class _MfaScreenState extends State<MfaScreen> {
     _startResendTimer();
   }
 
+  // Cambiar _startResendTimer a usar Timer.periodic
   void _startResendTimer() {
     setState(() {
       _canResend = false;
       _remainingSeconds = 30;
     });
 
-    Future.delayed(const Duration(seconds: 1), () {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
           _remainingSeconds--;
         });
 
-        if (_remainingSeconds > 0) {
-          _startResendTimer();
-        } else {
+        if (_remainingSeconds <= 0) {
           setState(() {
             _canResend = true;
           });
+          _timer?.cancel(); // Detener el temporizador una vez que llegue a 0
         }
       }
     });
@@ -94,7 +98,7 @@ class _MfaScreenState extends State<MfaScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: PinCodeTextField(
                 appContext: context,
-                length: 6,
+                length: 8,
                 controller: _codeController,
                 autoFocus: true,
                 keyboardType: TextInputType.number,
@@ -103,7 +107,7 @@ class _MfaScreenState extends State<MfaScreen> {
                   shape: PinCodeFieldShape.box,
                   borderRadius: BorderRadius.circular(8),
                   fieldHeight: 50,
-                  fieldWidth: 40,
+                  fieldWidth: 35,
                   activeFillColor: Colors.white,
                   inactiveFillColor: Colors.white,
                   selectedFillColor: Colors.grey[100],
@@ -164,7 +168,7 @@ class _MfaScreenState extends State<MfaScreen> {
   }
 
   Future<void> _verifyCode() async {
-    if (_codeController.text.length != 6) {
+    if (_codeController.text.length != 8) {
       setState(() {
         _error = 'Por favor ingrese un código de 6 dígitos';
       });
@@ -178,7 +182,8 @@ class _MfaScreenState extends State<MfaScreen> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.verifyMFA(_codeController.text);
+      final success =
+          await authProvider.verifyMFA(widget.otpId, _codeController.text);
 
       if (success && mounted) {
         // Navegar al dashboard según el rol
@@ -219,14 +224,15 @@ class _MfaScreenState extends State<MfaScreen> {
     });
 
     try {
-      // Simular reenvío de código (en una implementación real, llamaríamos al servicio)
-      await Future.delayed(const Duration(seconds: 2));
+      // Llamar al método resendOtp de AuthProvider para reenviar el código
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.resendOtp(widget.email); // Ahora utilizamos el método
 
       if (mounted) {
         setState(() {
           _isResending = false;
         });
-        _startResendTimer();
+        _startResendTimer(); // Reinicia el temporizador después de reenviar el código
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Código reenviado correctamente')),
         );
@@ -244,6 +250,8 @@ class _MfaScreenState extends State<MfaScreen> {
   @override
   void dispose() {
     _codeController.dispose();
+    _timer
+        ?.cancel(); // Asegúrate de cancelar el temporizador cuando se dispose el widget
     super.dispose();
   }
 }

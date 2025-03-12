@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../providers/access_provider.dart';
 
 class QrScannerScreen extends StatefulWidget {
-  const QrScannerScreen({Key? key}) : super(key: key);
+  const QrScannerScreen({super.key});
 
   @override
   State<QrScannerScreen> createState() => _QrScannerScreenState();
@@ -24,8 +23,6 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final accessProvider = Provider.of<AccessProvider>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Scan Access QR Code'),
@@ -35,17 +32,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
             onPressed: () => _scannerController.switchCamera(),
           ),
           IconButton(
-            icon: ValueListenableBuilder(
-              valueListenable: _scannerController.torchState,
-              builder: (context, state, child) {
-                switch (state as TorchState) {
-                  case TorchState.off:
-                    return const Icon(Icons.flash_off);
-                  case TorchState.on:
-                    return const Icon(Icons.flash_on);
-                }
-              },
-            ),
+            icon: const Icon(Icons.flash_off),
             onPressed: () => _scannerController.toggleTorch(),
           ),
         ],
@@ -64,22 +51,22 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
                   _isProcessing = true;
                 });
 
+                final accessProvider =
+                    Provider.of<AccessProvider>(context, listen: false);
                 await _processQrCode(barcode.rawValue!, accessProvider);
               }
             },
           ),
 
           // Scan overlay
-          Container(
-            decoration: ShapeDecoration(
-              shape: QrScannerOverlayShape(
-                borderColor: Theme.of(context).primaryColor,
-                borderRadius: 10,
-                borderLength: 30,
-                borderWidth: 10,
-                cutOutSize: 300,
-              ),
+          CustomPaint(
+            painter: ScannerOverlayPainter(
+              borderColor: Theme.of(context).primaryColor,
+              borderRadius: 10.0,
+              borderLength: 30.0,
+              borderWidth: 10.0,
             ),
+            child: Container(),
           ),
 
           // Loading indicator
@@ -211,4 +198,116 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       ),
     );
   }
+}
+
+// Custom painter para el marco de escaneo
+class ScannerOverlayPainter extends CustomPainter {
+  final Color borderColor;
+  final double borderRadius;
+  final double borderLength;
+  final double borderWidth;
+  final double cutOutSize;
+
+  ScannerOverlayPainter({
+    required this.borderColor,
+    required this.borderRadius,
+    required this.borderLength,
+    required this.borderWidth,
+    this.cutOutSize = 300,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = borderColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = borderWidth;
+
+    final double cutOutWidth = cutOutSize;
+    final double cutOutHeight = cutOutSize;
+
+    final Rect cutOutRect = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height / 2),
+      width: cutOutWidth,
+      height: cutOutHeight,
+    );
+
+    // Dibuja el fondo semitransparente
+    canvas.drawPath(
+      Path.combine(
+        PathOperation.difference,
+        Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height)),
+        Path()
+          ..addRRect(RRect.fromRectAndRadius(
+              cutOutRect, Radius.circular(borderRadius))),
+      ),
+      Paint()..color = Colors.black54,
+    );
+
+    // Dibuja las esquinas del marco
+    // Esquina superior izquierda
+    canvas.drawPath(
+      Path()
+        ..moveTo(cutOutRect.left, cutOutRect.top + borderRadius + borderLength)
+        ..lineTo(cutOutRect.left, cutOutRect.top + borderRadius)
+        ..arcToPoint(
+          Offset(cutOutRect.left + borderRadius, cutOutRect.top),
+          radius: Radius.circular(borderRadius),
+        )
+        ..lineTo(cutOutRect.left + borderRadius + borderLength, cutOutRect.top),
+      paint,
+    );
+
+    // Esquina superior derecha
+    canvas.drawPath(
+      Path()
+        ..moveTo(cutOutRect.right - borderRadius - borderLength, cutOutRect.top)
+        ..lineTo(cutOutRect.right - borderRadius, cutOutRect.top)
+        ..arcToPoint(
+          Offset(cutOutRect.right, cutOutRect.top + borderRadius),
+          radius: Radius.circular(borderRadius),
+        )
+        ..lineTo(
+            cutOutRect.right, cutOutRect.top + borderRadius + borderLength),
+      paint,
+    );
+
+    // Esquina inferior derecha
+    canvas.drawPath(
+      Path()
+        ..moveTo(
+            cutOutRect.right, cutOutRect.bottom - borderRadius - borderLength)
+        ..lineTo(cutOutRect.right, cutOutRect.bottom - borderRadius)
+        ..arcToPoint(
+          Offset(cutOutRect.right - borderRadius, cutOutRect.bottom),
+          radius: Radius.circular(borderRadius),
+        )
+        ..lineTo(
+            cutOutRect.right - borderRadius - borderLength, cutOutRect.bottom),
+      paint,
+    );
+
+    // Esquina inferior izquierda
+    canvas.drawPath(
+      Path()
+        ..moveTo(
+            cutOutRect.left + borderRadius + borderLength, cutOutRect.bottom)
+        ..lineTo(cutOutRect.left + borderRadius, cutOutRect.bottom)
+        ..arcToPoint(
+          Offset(cutOutRect.left, cutOutRect.bottom - borderRadius),
+          radius: Radius.circular(borderRadius),
+        )
+        ..lineTo(
+            cutOutRect.left, cutOutRect.bottom - borderRadius - borderLength),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(ScannerOverlayPainter oldDelegate) =>
+      oldDelegate.borderColor != borderColor ||
+      oldDelegate.borderRadius != borderRadius ||
+      oldDelegate.borderLength != borderLength ||
+      oldDelegate.borderWidth != borderWidth ||
+      oldDelegate.cutOutSize != cutOutSize;
 }

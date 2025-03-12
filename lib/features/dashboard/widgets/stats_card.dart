@@ -1,4 +1,3 @@
-// lib/features/dashboard/widgets/stats_card.dart
 import 'package:flutter/material.dart';
 
 class StatsCard extends StatelessWidget {
@@ -19,6 +18,14 @@ class StatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Obtén el ancho de la pantalla
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Definir el tamaño de los iconos dependiendo del ancho de la pantalla
+    double iconSize = screenWidth < 400
+        ? 14
+        : 20; // iconos más pequeños en pantallas pequeñas
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -43,25 +50,39 @@ class StatsCard extends StatelessWidget {
                 child: Icon(
                   icon,
                   color: color,
-                  size: 28,
+                  size: iconSize,
                 ),
               ),
               const SizedBox(height: 12),
 
-              // Valor principal
-              Text(
-                value,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              // Valor principal con tamaño dinámico
+              Expanded(
+                // Utilizamos Expanded para que ocupe el espacio restante sin desbordar
+                child: Text(
+                  value,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: screenWidth < 400
+                            ? 16
+                            : 20, // Ajusta el tamaño de texto
+                      ),
+                  overflow: TextOverflow
+                      .ellipsis, // Si el texto es largo, lo truncamos
+                  maxLines: 1, // Evita que el texto ocupe más de una línea
+                ),
               ),
 
-              // Título
+              // Título con estilo más pequeño
               Text(
                 title,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[600],
+                      fontSize: screenWidth < 400
+                          ? 14
+                          : 16, // Ajusta el tamaño de texto
                     ),
+                overflow: TextOverflow.ellipsis, // Trunca si es necesario
+                maxLines: 1, // Limita a una línea
               ),
             ],
           ),
